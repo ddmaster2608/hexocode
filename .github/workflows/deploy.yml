@@ -1,0 +1,50 @@
+name: 自动部署 Hexo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]  # 使用更稳定的Node.js版本
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v2  # 使用最新版本的actions/checkout
+
+      - name: 设置 Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: 安装 Hexo CLI
+        run: |
+          export TZ='Asia/Shanghai'
+          npm install hexo-cli -g
+
+      - name: 缓存依赖
+        uses: actions/cache@v2  # 使用最新版本的actions/cache
+        id: cache-dependencies
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: 安装插件
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: 生成并部署博客
+        run: |
+          hexo clean && hexo g && hexo douban
+          npx gulp  # 使用 npx 来运行 gulp
+          cd ./public
+          git init
+          git config user.name "${{ secrets.GIT_NAME }}"
+          git config user.email "${{ secrets.GIT_EMAIL }}"
+          git add .
+          git commit -m "Update"
+          git push --force --quiet "https://${{ secrets.GH_TOKEN }}@github.com/ddmaster2608/ddmaster2608.github.io.git" master:main
