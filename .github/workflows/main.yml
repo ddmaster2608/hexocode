@@ -39,7 +39,7 @@ jobs:
           npm install
 
       - name: 部署博客
-        run: 
+        run: |
           hexo clean && hexo g && hexo douban && gulp
           cd ./public
           git init
