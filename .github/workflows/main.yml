@@ -27,7 +27,7 @@ jobs:
           npm install hexo-cli -g
 
       - name: 缓存依赖
-        uses: actions/cache@v2  # 使用最新版本的actions/cache
+        uses: actions/cache@v4  # 使用最新版本的actions/cache
         id: cache-dependencies
         with:
           path: node_modules
