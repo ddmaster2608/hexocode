@@ -10,25 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20.x]  # 推荐升级到 LTS 版本（18.x/20.x）
+        node-version: [20.x]  # 使用 Node.js 20 LTS
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4  # 升级到 v4
+        uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}  # 显式传递 token
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 设置 Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4  # 升级到 v4
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'  # 自动缓存 node_modules
+          cache: 'npm'
 
       - name: 安装 Hexo CLI
-        run: |
-          npm install hexo-cli -g
+        run: npm install hexo-cli -g
         env:
-          TZ: Asia/Shanghai  # 更规范的时区设置方式
+          TZ: Asia/Shanghai
 
       - name: 缓存依赖
         uses: actions/cache@v4
@@ -36,27 +35,32 @@ jobs:
         with:
           path: |
             node_modules
-            ~/.npm  # 增加 npm 缓存目录
+            ~/.npm
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
       - name: 安装插件
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: npm ci  # 使用 ci 代替 install 保证依赖一致性
+        run: npm ci
 
-      - name: 生成并部署博客
+      - name: 生成静态文件
         run: |
-          hexo clean && hexo g && hexo douban
-          
+          hexo clean
+          hexo g
+          hexo douban  # 确保此插件已正确安装
+          ls -al public  # 调试：检查 public 是否存在
+
+      - name: 部署到 GitHub Pages
+        run: |
           cd ./public
           
-          # 初始化 Git 并配置
+          # 初始化 Git（局部配置）
           git init
-          git config --global user.name "${{ secrets.GIT_NAME }}"
-          git config --global user.email "${{ secrets.GIT_EMAIL }}"
+          git config user.name "${{ secrets.GIT_NAME }}"
+          git config user.email "${{ secrets.GIT_EMAIL }}"
           
           # 添加文件并提交
           git add .
-          git commit -m "GitHub Actions Auto Build: ${{ github.sha }}"
+          git commit -m "Auto deploy: ${{ github.sha }}"
           
-          # 强制推送到目标仓库
-          git push --force --quiet "https://${{ secrets.GITHUB_TOKEN }}@github.com/ddmaster2608/ddmaster2608.github.io.git" master:main
+          # 使用 PAT 推送（非 GITHUB_TOKEN）
+          git push --force --quiet "https://${{ secrets.PAT_TOKEN }}@github.com/ddmaster2608/ddmaster2608.github.io.git" HEAD:main
