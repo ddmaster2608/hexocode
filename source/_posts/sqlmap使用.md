@@ -3,8 +3,8 @@ abbrlink: ''
 categories: []
 date: '2025-03-31T21:52:06.451323+08:00'
 tags: []
-title: title
-updated: '2025-03-31T21:55:53.222+08:00'
+title: sqlmap使用
+updated: '2025-03-31T21:56:46.751+08:00'
 ---
 # 1. **目标指定**
 
