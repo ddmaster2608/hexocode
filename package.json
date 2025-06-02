@@ -26,6 +26,6 @@
     "pangu": "^4.0.7"
   },
   "devDependencies": {
-    "gulp": "^5.0.0"
+    "gulp": "^5.0.1"
   }
 }
