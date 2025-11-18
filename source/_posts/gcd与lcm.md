@@ -4,11 +4,11 @@ categories: []
 date: '2025-04-10T17:46:54.838435+08:00'
 tags: []
 title: gcd与lcm
-updated: '2025-11-18T16:11:15.554+08:00'
+updated: '2025-11-18T16:15:03.965+08:00'
 ---
 # gcd与lcm计算代码
 
-草 ，__gcd(x,y)能秒 
+草 ，__gcd(x,y)能秒
 
 ```
 #includeiostream
