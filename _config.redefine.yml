@@ -1,0 +1,93 @@
+info:
+  title: "WFN 's Blog"
+  subtitle: Learning, tinkering, and notes.
+  author: GoodNut
+  url: https://ddmaster2608.github.io
+
+defaults:
+  favicon: /images/favicon.ico
+  logo: /images/logo.svg
+  avatar: /images/avatar.jpg
+
+global:
+  website_counter:
+    enable: false
+    site_pv: false
+    site_uv: false
+    post_pv: false
+  preloader:
+    enable: false
+  open_graph:
+    enable: true
+    image: /images/avatar.jpg
+    description: Learning, tinkering, and notes.
+
+home_banner:
+  enable: true
+  title: "WFN 's Blog"
+  subtitle:
+    text:
+      - Learning, tinkering, and notes.
+      - CTF / Web / C++ / Blog
+
+navbar:
+  links:
+    Home:
+      path: /
+      icon: fa-regular fa-house
+    Archives:
+      path: /archives
+      icon: fa-regular fa-box-archive
+    Categories:
+      path: /categories
+      icon: fa-regular fa-folder-open
+    Tags:
+      path: /tags
+      icon: fa-regular fa-tags
+  search:
+    enable: false
+
+home:
+  sidebar:
+    enable: true
+    position: left
+    first_item: info
+    announcement: Welcome to my blog.
+    show_on_mobile: true
+    links:
+      Archives:
+        path: /archives
+        icon: fa-regular fa-box-archive
+      Categories:
+        path: /categories
+        icon: fa-regular fa-folder-open
+      Tags:
+        path: /tags
+        icon: fa-regular fa-tags
+
+articles:
+  word_count:
+    enable: false
+    count: false
+    min2read: false
+  copyright:
+    enable: true
+    default: cc_by_nc_sa
+
+comment:
+  enable: false
+
+footer:
+  runtime: false
+  statistics: false
+  customize: Learning, tinkering, and notes.
+  icp:
+    enable: false
+
+plugins:
+  feed:
+    enable: false
+  aplayer:
+    enable: false
+  mermaid:
+    enable: false
