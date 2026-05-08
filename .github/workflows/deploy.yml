@@ -1,50 +1,49 @@
-name: 自动部署 Hexo
+name: Deploy Hexo
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [14.x]  # 使用更稳定的Node.js版本
+    env:
+      TZ: Asia/Shanghai
+      DEPLOY_TOKEN: ${{ secrets.PAT_TOKEN }}
+      GIT_NAME: ${{ secrets.GIT_NAME }}
+      GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
 
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v2  # 使用最新版本的actions/checkout
+      - name: Checkout source repo
+        uses: actions/checkout@v4
 
-      - name: 设置 Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
+          cache: npm
 
-      - name: 安装 Hexo CLI
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static site
         run: |
-          export TZ='Asia/Shanghai'
-          npm install hexo-cli -g
+          npx hexo clean
+          npx hexo generate
 
-      - name: 缓存依赖
-        uses: actions/cache@v2  # 使用最新版本的actions/cache
-        id: cache-dependencies
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-
-      - name: 安装插件
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: npm install
-
-      - name: 生成并部署博客
+      - name: Publish generated site
+        shell: bash
         run: |
-          hexo clean && hexo g && hexo douban
-          npx gulp  # 使用 npx 来运行 gulp
-          cd ./public
+          set -euo pipefail
+
+          if [ -z "${DEPLOY_TOKEN}" ]; then
+            echo "PAT_TOKEN secret is missing."
+            exit 1
+          fi
+
+          cd public
           git init
-          git config user.name "${{ secrets.GIT_NAME }}"
-          git config user.email "${{ secrets.GIT_EMAIL }}"
+          git config user.name "${GIT_NAME:-github-actions[bot]}"
+          git config user.email "${GIT_EMAIL:-41898282+github-actions[bot]@users.noreply.github.com}"
           git add .
-          git commit -m "Update"
-          git push --force --quiet "https://${{ secrets.GH_TOKEN }}@github.com/ddmaster2608/ddmaster2608.github.io.git" master:main
+          git commit -m "Auto deploy: ${GITHUB_SHA}" || echo "No content changes to commit."
+          git push --force "https://x-access-token:${DEPLOY_TOKEN}@github.com/ddmaster2608/ddmaster2608.github.io.git" HEAD:main

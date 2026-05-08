@@ -1,0 +1,15 @@
+[Unit]
+Description=Hexo Local Admin
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/hexocode
+EnvironmentFile=/etc/hexo-admin.env
+ExecStart=/usr/bin/npm run admin
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
