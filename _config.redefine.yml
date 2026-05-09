@@ -1,12 +1,12 @@
 info:
-  title: "WFN 's Blog"
+  title: "Goodnut's BLOG"
   subtitle: Learning, tinkering, and notes.
   author: GoodNut
   url: https://ddmaster2608.github.io
 
 defaults:
   favicon: /images/favicon.ico
-  logo: /images/logo.svg
+  logo: /images/logo.jpg
   avatar: /images/avatar.jpg
 
 global:
@@ -24,11 +24,14 @@ global:
 
 home_banner:
   enable: true
-  title: "WFN 's Blog"
+  image:
+    light: /images/banner-light.jpg
+    dark: /images/banner-dark.png
+  title: "Goodnut's BLOG"
   subtitle:
     text:
-      - Learning, tinkering, and notes.
-      - CTF / Web / C++ / Blog
+      - Pao de kuai bu yi ding neng shu
+      - Lao die gen tou, cai shi cheng gong
 
 navbar:
   links:
@@ -52,7 +55,7 @@ home:
     enable: true
     position: left
     first_item: info
-    announcement: Welcome to my blog.
+    announcement: Shen wu cai feng shuang fei yi, xin you ling xi yi dian tong.
     show_on_mobile: true
     links:
       Archives:
@@ -67,9 +70,9 @@ home:
 
 articles:
   word_count:
-    enable: false
-    count: false
-    min2read: false
+    enable: true
+    count: true
+    min2read: true
   copyright:
     enable: true
     default: cc_by_nc_sa
@@ -80,7 +83,7 @@ comment:
 footer:
   runtime: false
   statistics: false
-  customize: Learning, tinkering, and notes.
+  customize: Goodnut's BLOG
   icp:
     enable: false
 
