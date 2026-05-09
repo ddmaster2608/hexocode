@@ -1,18 +1,15 @@
 info:
-  title: "Goodnut's BLOG"
-  subtitle: "??????????"
+  title: Goodnut's BLOG
+  subtitle: "\u8BB0\u5F55\u6298\u817E\u3001\u5B66\u4E60\u4E0E\u968F\u60F3"
   author: GoodNut
   url: https://ddmaster2608.github.io
-
 defaults:
   favicon: /images/favicon.ico
   logo: /images/logo.jpg
   avatar: /images/avatar.jpg
-
 colors:
-  primary: "#A31F34"
+  primary: '#A31F34'
   default_mode: light
-
 global:
   website_counter:
     enable: false
@@ -24,19 +21,19 @@ global:
   open_graph:
     enable: true
     image: /images/avatar.jpg
-    description: "Goodnut ???????????????"
-
+    description: "Goodnut \u7684\u535A\u5BA2\uFF0C\u8BB0\u5F55\u6298\u817E\u3001\u5B66\
+      \u4E60\u4E0E\u968F\u60F3\u3002"
 home_banner:
   enable: true
   style: fixed
   image:
     light: /images/banner-light.jpg
     dark: /images/banner-dark.png
-  title: "Goodnut's BLOG"
+  title: Goodnut's BLOG
   subtitle:
     text:
-      - "????????"
-      - "?????????"
+    - "\u8DD1\u5F97\u5FEB\u4E0D\u4E00\u5B9A\u80FD\u8F93"
+    - "\u8001\u8DCC\u8DDF\u5934\uFF0C\u624D\u662F\u6210\u529F"
     typing_speed: 100
     backing_speed: 80
     starting_delay: 500
@@ -47,13 +44,12 @@ home_banner:
     enable: true
     style: default
     links:
-      - icon: github
-        url: https://github.com/ddmaster2608
-      - icon: email
-        url: mailto:owen238509427@163.com
-      - icon: fa-brands fa-bilibili
-        url: https://search.bilibili.com/all?keyword=good_nut
-
+    - icon: github
+      url: https://github.com/ddmaster2608
+    - icon: email
+      url: mailto:owen238509427@163.com
+    - icon: fa-brands fa-bilibili
+      url: https://search.bilibili.com/all?keyword=good_nut
 navbar:
   links:
     Home:
@@ -70,13 +66,13 @@ navbar:
       icon: fa-regular fa-tags
   search:
     enable: false
-
 home:
   sidebar:
     enable: true
     position: left
     first_item: info
-    announcement: "???????????????????????"
+    announcement: "\u4F17\u91CC\u5BFB\u4ED6\u5343\u767E\u5EA6\uFF0C\u84E6\u7136\u56DE\
+      \u9996\uFF0C\u90A3\u4EBA\u5374\u5728\uFF0C\u706F\u706B\u9611\u73CA\u5904"
     show_on_mobile: true
     links:
       Archives:
@@ -88,7 +84,6 @@ home:
       Tags:
         path: /tags
         icon: fa-regular fa-tags
-
 articles:
   word_count:
     enable: true
@@ -97,17 +92,14 @@ articles:
   copyright:
     enable: true
     default: cc_by_nc_sa
-
 comment:
   enable: false
-
 footer:
   runtime: false
   statistics: false
   customize: Goodnut's BLOG
   icp:
     enable: false
-
 plugins:
   feed:
     enable: false
