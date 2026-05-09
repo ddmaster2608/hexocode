@@ -1,6 +1,6 @@
 info:
   title: "Goodnut's BLOG"
-  subtitle: Learning, tinkering, and notes.
+  subtitle: ??????????
   author: GoodNut
   url: https://ddmaster2608.github.io
 
@@ -8,6 +8,10 @@ defaults:
   favicon: /images/favicon.ico
   logo: /images/logo.jpg
   avatar: /images/avatar.jpg
+
+colors:
+  primary: "#A31F34"
+  default_mode: light
 
 global:
   website_counter:
@@ -20,18 +24,35 @@ global:
   open_graph:
     enable: true
     image: /images/avatar.jpg
-    description: Learning, tinkering, and notes.
+    description: Goodnut ???????????????
 
 home_banner:
   enable: true
+  style: fixed
   image:
     light: /images/banner-light.jpg
     dark: /images/banner-dark.png
   title: "Goodnut's BLOG"
   subtitle:
     text:
-      - Pao de kuai bu yi ding neng shu
-      - Lao die gen tou, cai shi cheng gong
+      - ????????
+      - ?????????
+    typing_speed: 100
+    backing_speed: 80
+    starting_delay: 500
+    backing_delay: 1500
+    loop: true
+    smart_backspace: true
+  social_links:
+    enable: true
+    style: default
+    links:
+      - icon: github
+        url: https://github.com/ddmaster2608
+      - icon: email
+        url: mailto:owen238509427@163.com
+      - icon: fa-brands fa-bilibili
+        url: https://search.bilibili.com/all?keyword=good_nut
 
 navbar:
   links:
@@ -55,7 +76,7 @@ home:
     enable: true
     position: left
     first_item: info
-    announcement: Shen wu cai feng shuang fei yi, xin you ling xi yi dian tong.
+    announcement: ???????????????
     show_on_mobile: true
     links:
       Archives:
