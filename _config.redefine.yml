@@ -107,3 +107,10 @@ plugins:
     enable: false
   mermaid:
     enable: false
+inject:
+  enable: true
+  head:
+  - "<style>.home-banner .description,\n.home-banner .description * ,\n.home-sidebar,\n\
+    .home-sidebar * ,\n.info-card,\n.info-card * {\n  font-family: 'PingFang SC',\
+    \ 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans\
+    \ SC', 'WenQuanYi Micro Hei', sans-serif !important;\n}</style>"
