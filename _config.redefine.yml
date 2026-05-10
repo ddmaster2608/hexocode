@@ -91,11 +91,20 @@ articles:
     default: cc_by_nc_sa
 comment:
   enable: true
-  system: artalk
+  system: giscus
   config:
-    artalk:
-      server: https://artalk.118-25-154-200.sslip.io
-      site: Goodnut's Blog
+    giscus:
+      repo: ddmaster2608/ddmaster2608.github.io
+      repo_id: R_kgDOND-PJQ
+      category: General
+      category_id: DIC_kwDOND-PJc4C8sl-
+      mapping: pathname
+      strict: 0
+      reactions_enabled: 1
+      emit_metadata: 0
+      lang: zh-CN
+      input_position: bottom
+      loading: lazy
 footer:
   runtime: false
   statistics: false
