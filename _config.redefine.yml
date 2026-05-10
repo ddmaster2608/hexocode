@@ -118,11 +118,11 @@ plugins:
     enable: true
     type: fixed
     audios:
-    - name: ?????????????
-      artist: ???
-      url: /music/wulun.flac
-      cover: /images/avatar.jpg
-      lrc: /music/wulun.lrc
+    - name: 无论你多怪异我还是会喜欢你
+      artist: 江惠莲
+      url: /music/wulun.m4a
+      cover: /music/wulun-cover.jpg
+      lrc: ''
       theme: '#A31F34'
   mermaid:
     enable: false
