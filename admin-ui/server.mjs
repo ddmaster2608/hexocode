@@ -559,12 +559,24 @@ function createTask(name, runner) {
 function runCommand(task, label, command, args, options = {}) {
   return new Promise((resolve, reject) => {
     appendTaskLog(task, `\n> ${label}\n$ ${command} ${args.join(' ')}\n`);
+    let settled = false;
+    let timedOut = false;
 
     const child = spawn(command, args, {
       cwd: options.cwd ?? repoRoot,
       env: { ...process.env, ...options.env },
       shell: false
     });
+
+    const timeoutMs = options.timeoutMs ?? 10 * 60 * 1000;
+    const timeout = timeoutMs
+      ? setTimeout(() => {
+          timedOut = true;
+          appendTaskLog(task, `\n[error] ${label} timed out after ${Math.round(timeoutMs / 1000)} seconds.\n`);
+          child.kill('SIGTERM');
+          setTimeout(() => child.kill('SIGKILL'), 5000).unref?.();
+        }, timeoutMs)
+      : null;
 
     child.stdout.on('data', (chunk) => {
       appendTaskLog(task, chunk.toString());
@@ -575,10 +587,28 @@ function runCommand(task, label, command, args, options = {}) {
     });
 
     child.on('error', (error) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (timeout) {
+        clearTimeout(timeout);
+      }
       reject(error);
     });
 
     child.on('close', (code) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      if (timedOut) {
+        reject(new Error(`${label} timed out.`));
+        return;
+      }
       if (code === 0) {
         resolve();
         return;
@@ -742,12 +772,20 @@ async function deployPublicDirectory(task) {
 
   const deployDir = path.join(repoRoot, '.deploy_git');
   const pagesTargetRepository = buildAuthenticatedGithubUrl(pagesDeployRepository);
-  const { deployRunner, deployCapture } = await ensurePagesDeployRepository(
-    task,
-    deployDir,
-    pagesTargetRepository
-  );
+  const deployRunner = (label, command, args, options = {}) =>
+    runCommand(task, label, command, args, { cwd: deployDir, timeoutMs: 180_000, ...options });
+  const deployCapture = (command, args) => runCommandCapture(command, args, { cwd: deployDir });
 
+  await fsp.rm(deployDir, { recursive: true, force: true });
+  await fsp.mkdir(deployDir, { recursive: true });
+  await deployRunner('Initialize Pages deployment repository', 'git', ['init']);
+  await deployRunner('Switch Pages deployment branch', 'git', ['checkout', '-B', pagesDeployBranch]);
+  await deployRunner('Configure Pages deployment repository remote', 'git', [
+    'remote',
+    'add',
+    'origin',
+    pagesTargetRepository
+  ]);
   await fsp.cp(path.join(repoRoot, 'public'), deployDir, { recursive: true });
 
   await deployRunner(
@@ -777,7 +815,7 @@ async function deployPublicDirectory(task) {
   await deployRunner(
     `Push generated site to GitHub Pages ${pagesDeployBranch}`,
     'git',
-    ['push', 'origin', `HEAD:${pagesDeployBranch}`]
+    ['push', '--force', 'origin', `HEAD:${pagesDeployBranch}`]
   );
 }
 
