@@ -619,6 +619,40 @@ function runCommand(task, label, command, args, options = {}) {
   });
 }
 
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function runCommandWithRetries(task, label, command, args, options = {}) {
+  const retries = options.retries ?? 2;
+  const retryDelayMs = options.retryDelayMs ?? 5000;
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      await runCommand(
+        task,
+        attempt === 0 ? label : `${label} (retry ${attempt}/${retries})`,
+        command,
+        args,
+        options
+      );
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt >= retries) {
+        break;
+      }
+      appendTaskLog(task, `\n[warn] ${label} failed: ${error.message}. Retrying in ${Math.round(retryDelayMs / 1000)} seconds.\n`);
+      await delay(retryDelayMs);
+    }
+  }
+
+  throw lastError;
+}
+
 function runCommandCapture(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
@@ -774,6 +808,12 @@ async function deployPublicDirectory(task) {
   const pagesTargetRepository = buildAuthenticatedGithubUrl(pagesDeployRepository);
   const deployRunner = (label, command, args, options = {}) =>
     runCommand(task, label, command, args, { cwd: deployDir, timeoutMs: 180_000, ...options });
+  const deployRunnerWithRetries = (label, command, args, options = {}) =>
+    runCommandWithRetries(task, label, command, args, {
+      cwd: deployDir,
+      timeoutMs: 180_000,
+      ...options
+    });
   const deployCapture = (command, args) => runCommandCapture(command, args, { cwd: deployDir });
 
   await fsp.rm(deployDir, { recursive: true, force: true });
@@ -812,10 +852,11 @@ async function deployPublicDirectory(task) {
     return;
   }
 
-  await deployRunner(
+  await deployRunnerWithRetries(
     `Push generated site to GitHub Pages ${pagesDeployBranch}`,
     'git',
-    ['push', '--force', 'origin', `HEAD:${pagesDeployBranch}`]
+    ['push', '--force', 'origin', `HEAD:${pagesDeployBranch}`],
+    { retries: 3, retryDelayMs: 8000, timeoutMs: 180_000 }
   );
 }
 
@@ -1128,26 +1169,33 @@ async function handleApi(request, response, url) {
 
       await runCommand(runningTask, 'Build Hexo site', npmCommand, ['run', 'build']);
 
+      if (pagesDeployEnabled) {
+        await deployPublicDirectory(runningTask);
+        appendTaskLog(runningTask, '\n[info] GitHub Pages repository update completed.\n');
+      } else {
+        appendTaskLog(runningTask, '\n[info] GitHub Pages deployment is disabled.\n');
+      }
+
       const targetBranch = gitPushBranch || gitStatus.branch;
       if (!targetBranch) {
         throw new Error('Cannot determine which Git branch should be pushed.');
       }
 
       const sourcePushTarget = await getSourcePushTarget(gitStatus);
-      await runCommand(
-        runningTask,
-        `Push source repository to ${gitPushRemote}/${targetBranch}`,
-        'git',
-        ['push', sourcePushTarget, `HEAD:${targetBranch}`]
-      );
-
-      appendTaskLog(runningTask, '\n[info] Source repository push completed.\n');
-
-      if (pagesDeployEnabled) {
-        await deployPublicDirectory(runningTask);
-        appendTaskLog(runningTask, '\n[info] GitHub Pages repository update completed.\n');
-      } else {
-        appendTaskLog(runningTask, '\n[info] GitHub Pages deployment is disabled.\n');
+      try {
+        await runCommandWithRetries(
+          runningTask,
+          `Push source repository to ${gitPushRemote}/${targetBranch}`,
+          'git',
+          ['push', sourcePushTarget, `HEAD:${targetBranch}`],
+          { retries: 3, retryDelayMs: 8000, timeoutMs: 180_000 }
+        );
+        appendTaskLog(runningTask, '\n[info] Source repository push completed.\n');
+      } catch (error) {
+        appendTaskLog(
+          runningTask,
+          `\n[warn] Source repository push failed after retries, but the generated site deployment already ran. ${error.message}\n`
+        );
       }
     });
 
