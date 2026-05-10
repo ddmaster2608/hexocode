@@ -7,6 +7,7 @@ tags:
 - learn
 title: c++杂记 —字符串和有趣的函数
 updated: '2024-11-14T23:12:09.831+08:00'
+cover: https://s2.loli.net/2025/08/20/tS9JrYg64OX5UqR.png
 ---
 # 字符串基础
 

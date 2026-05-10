@@ -8,6 +8,7 @@ tags:
 - web
 title: php伪协议
 updated: '2025-04-01T23:43:07.800+08:00'
+cover: https://s2.loli.net/2025/03/28/SlRhxagqOyCBFP1.png
 ---
 常用的伪协议有
 

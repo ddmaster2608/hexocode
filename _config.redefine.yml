@@ -29,11 +29,10 @@ home_banner:
   image:
     light: /images/banner-light.jpg
     dark: /images/banner-dark.png
-  title: Goodnut's BLOG
+  title: ???????
   subtitle:
     text:
-    - ???????
-    - ????????
+    - Goodnut's Blog
     typing_speed: 100
     backing_speed: 80
     starting_delay: 500

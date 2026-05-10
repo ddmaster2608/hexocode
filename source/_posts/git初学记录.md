@@ -7,6 +7,7 @@ tags:
 - git
 title: git初学记录
 updated: '2024-10-27T11:31:01.843+08:00'
+cover: https://s2.loli.net/2025/03/28/sNHiDIwh4aQ1UBt.png
 ---
 # git 将本地仓库上传至github
 

@@ -7,6 +7,7 @@ tags:
 - web
 title: 2025Lilctf复现
 updated: '2025-08-20T20:58:36.115+08:00'
+cover: https://s2.loli.net/2025/08/20/jKAzVhrM8x9iBXU.png
 ---
 # Lilctf复现
 

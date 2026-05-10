@@ -8,6 +8,7 @@ tags:
 - ctf
 title: web（1）
 updated: '2025-03-28T23:55:22.414+08:00'
+cover: https://s2.loli.net/2025/03/11/Iha8HMt1ow7OLcD.png
 ---
 # 概述
 

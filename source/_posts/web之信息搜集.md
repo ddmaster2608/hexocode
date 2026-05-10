@@ -8,6 +8,7 @@ tags:
 - ctf
 title: web之信息搜集
 updated: '2025-05-24T19:34:43.187+08:00'
+cover: https://s2.loli.net/2025/08/20/9xW1En72oUQrKuA.jpg
 ---
 # 按f12
 
