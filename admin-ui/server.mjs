@@ -641,6 +641,15 @@ async function pathExists(targetPath) {
   }
 }
 
+async function clearDirectoryContents(targetPath) {
+  const entries = await fsp.readdir(targetPath, { withFileTypes: true });
+  await Promise.all(
+    entries
+      .filter((entry) => entry.name !== '.git')
+      .map((entry) => fsp.rm(path.join(targetPath, entry.name), { recursive: true, force: true }))
+  );
+}
+
 async function isGitRepository() {
   try {
     const { stdout } = await runCommandCapture('git', ['rev-parse', '--is-inside-work-tree']);
@@ -650,6 +659,82 @@ async function isGitRepository() {
   }
 }
 
+async function ensurePagesDeployRepository(task, deployDir, pagesTargetRepository) {
+  const deployRunner = (label, command, args) =>
+    runCommand(task, label, command, args, { cwd: deployDir });
+  const deployCapture = (command, args) => runCommandCapture(command, args, { cwd: deployDir });
+  const gitDir = path.join(deployDir, '.git');
+
+  if (!(await pathExists(gitDir))) {
+    await fsp.mkdir(deployDir, { recursive: true });
+
+    try {
+      await runCommand(task, 'Clone Pages deployment repository', 'git', [
+        'clone',
+        '--depth',
+        '1',
+        '--branch',
+        pagesDeployBranch,
+        pagesTargetRepository,
+        deployDir
+      ]);
+    } catch (error) {
+      appendTaskLog(
+        task,
+        '\n[info] Pages branch clone failed, creating a fresh deployment repository instead.\n'
+      );
+
+      await fsp.mkdir(deployDir, { recursive: true });
+      await deployRunner('Initialize Pages deployment repository', 'git', ['init']);
+      await deployRunner(
+        'Configure Pages deployment repository remote',
+        'git',
+        ['remote', 'add', 'origin', pagesTargetRepository]
+      ).catch(async () => {
+        await deployRunner(
+          'Update Pages deployment repository remote',
+          'git',
+          ['remote', 'set-url', 'origin', pagesTargetRepository]
+        );
+      });
+      await deployRunner('Create Pages deployment branch', 'git', ['checkout', '--orphan', pagesDeployBranch]);
+      await clearDirectoryContents(deployDir);
+      return { deployRunner, deployCapture };
+    }
+  }
+
+  await deployRunner(
+    'Update Pages deployment repository remote',
+    'git',
+    ['remote', 'set-url', 'origin', pagesTargetRepository]
+  );
+
+  try {
+    await deployRunner('Fetch latest Pages deployment branch', 'git', [
+      'fetch',
+      '--depth',
+      '1',
+      'origin',
+      pagesDeployBranch
+    ]);
+    await deployRunner('Reset Pages deployment repository', 'git', [
+      'reset',
+      '--hard',
+      'FETCH_HEAD'
+    ]);
+  } catch (error) {
+    appendTaskLog(
+      task,
+      '\n[warn] Failed to refresh existing Pages deployment repository, rebuilding local deployment cache.\n'
+    );
+    await fsp.rm(deployDir, { recursive: true, force: true });
+    return ensurePagesDeployRepository(task, deployDir, pagesTargetRepository);
+  }
+
+  await clearDirectoryContents(deployDir);
+  return { deployRunner, deployCapture };
+}
+
 async function deployPublicDirectory(task) {
   if (!(await pathExists(path.join(repoRoot, 'public')))) {
     throw new Error('Build output directory public/ does not exist.');
@@ -657,63 +742,43 @@ async function deployPublicDirectory(task) {
 
   const deployDir = path.join(repoRoot, '.deploy_git');
   const pagesTargetRepository = buildAuthenticatedGithubUrl(pagesDeployRepository);
-
-  if (await pathExists(deployDir)) {
-    await fsp.rm(deployDir, { recursive: true, force: true });
-  }
+  const { deployRunner, deployCapture } = await ensurePagesDeployRepository(
+    task,
+    deployDir,
+    pagesTargetRepository
+  );
 
   await fsp.cp(path.join(repoRoot, 'public'), deployDir, { recursive: true });
 
-  try {
-    const deployRunner = (label, command, args) =>
-      runCommand(task, label, command, args, { cwd: deployDir });
+  await deployRunner(
+    'Configure Pages deployment commit author',
+    'git',
+    ['config', 'user.name', gitCommitName]
+  );
+  await deployRunner(
+    'Configure Pages deployment commit email',
+    'git',
+    ['config', 'user.email', gitCommitEmail]
+  );
+  await deployRunner('Stage generated site for Pages deployment', 'git', ['add', '-A']);
 
-    const deployCapture = (command, args) => runCommandCapture(command, args, { cwd: deployDir });
-
-    await deployRunner('Initialize Pages deployment repository', 'git', ['init']);
-    await deployRunner(
-      'Configure Pages deployment repository remote',
-      'git',
-      ['remote', 'add', 'origin', pagesTargetRepository]
-    ).catch(async () => {
-      await deployRunner(
-        'Update Pages deployment repository remote',
-        'git',
-        ['remote', 'set-url', 'origin', pagesTargetRepository]
-      );
-    });
-
-    await deployRunner(
-      'Configure Pages deployment commit author',
-      'git',
-      ['config', 'user.name', gitCommitName]
-    );
-    await deployRunner(
-      'Configure Pages deployment commit email',
-      'git',
-      ['config', 'user.email', gitCommitEmail]
-    );
-    await deployRunner('Stage generated site for Pages deployment', 'git', ['add', '-A']);
-
-    const deployStatus = await deployCapture('git', ['status', '--short']);
-    if (deployStatus.stdout.trim()) {
-      await deployRunner('Commit generated site for Pages deployment', 'git', [
-        'commit',
-        '-m',
-        `Deploy site ${new Date().toISOString()}`
-      ]);
-    } else {
-      appendTaskLog(task, '\n[info] No generated site changes to commit for Pages deployment.\n');
-    }
-
-    await deployRunner(
-      `Push generated site to GitHub Pages ${pagesDeployBranch}`,
-      'git',
-      ['push', '--force', 'origin', `HEAD:${pagesDeployBranch}`]
-    );
-  } finally {
-    await fsp.rm(deployDir, { recursive: true, force: true }).catch(() => {});
+  const deployStatus = await deployCapture('git', ['status', '--short']);
+  if (deployStatus.stdout.trim()) {
+    await deployRunner('Commit generated site for Pages deployment', 'git', [
+      'commit',
+      '-m',
+      `Deploy site ${new Date().toISOString()}`
+    ]);
+  } else {
+    appendTaskLog(task, '\n[info] No generated site changes to commit for Pages deployment.\n');
+    return;
   }
+
+  await deployRunner(
+    `Push generated site to GitHub Pages ${pagesDeployBranch}`,
+    'git',
+    ['push', 'origin', `HEAD:${pagesDeployBranch}`]
+  );
 }
 
 async function getGitStatus() {
