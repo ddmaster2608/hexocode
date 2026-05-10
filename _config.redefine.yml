@@ -29,7 +29,7 @@ home_banner:
   image:
     light: /images/banner-light.jpg
     dark: /images/banner-dark.png
-  title: ???????
+  title: "\u5f53\u65f6\u53ea\u9053\u662f\u5bfb\u5e38"
   subtitle:
     text:
     - Goodnut's Blog

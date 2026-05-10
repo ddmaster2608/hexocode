@@ -5,7 +5,7 @@ date: '2025-11-14T21:24:25.687653+08:00'
 tags: []
 title: 初识rsa
 updated: '2025-11-29T17:27:24.246+08:00'
-cover: https://s2.loli.net/2025/10/15/e4Ah1ZGsnoUj7Hi.png
+cover: 'https://files.seeusercontent.com/2026/05/10/q1gM/IMG_20241130_093027.jpg'
 ---
 ~~因为要考网安所以来学rsa~~
 

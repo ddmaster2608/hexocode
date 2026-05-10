@@ -8,7 +8,7 @@ tags:
 - ctf
 title: php常见函数
 updated: '2025-04-01T23:27:15.479+08:00'
-cover: https://s2.loli.net/2025/03/28/S2nyAE8VHzCkaUG.png
+cover: 'https://files.seeusercontent.com/2026/05/10/l7eQ/Image_37623218591428.png'
 ---
 # 在此贴中将会更新一些在做题过程中遇到的php常见函数
 
