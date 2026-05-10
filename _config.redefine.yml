@@ -115,7 +115,15 @@ plugins:
   feed:
     enable: false
   aplayer:
-    enable: false
+    enable: true
+    type: fixed
+    audios:
+    - name: ?????????????
+      artist: ???
+      url: /music/wulun.flac
+      cover: /images/avatar.jpg
+      lrc: /music/wulun.lrc
+      theme: '#A31F34'
   mermaid:
     enable: false
 inject:
