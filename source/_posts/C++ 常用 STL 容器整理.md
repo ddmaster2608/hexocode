@@ -1,7 +1,7 @@
 ---
 title: 'C++ 常用 STL 容器整理'
 date: '2026-05-20T19:47:54+08:00'
-updated: '2026-05-20T20:11:05+08:00'
+updated: '2026-05-20T20:16:18+08:00'
 abbrlink: ''
 ---
 # C++ 常用 STL 容器与函数整理
@@ -24,10 +24,10 @@ abbrlink: ''
 
   竞赛常用万能头文件：
 
-'''cpp
+```cpp
   #include <bits/stdc++.h>
   using namespace std;
-'''
+```
 
 
   # 常用容器总览
@@ -53,11 +53,11 @@ abbrlink: ''
 
   vector 是动态数组，支持随机访问。
 
-'''cpp
+```cpp
   vector<int> v;
   vector<int> v(n);
   vector<int> v(n, 0);
-'''
+```
 
   ## 常用成员函数
 
@@ -85,7 +85,7 @@ abbrlink: ''
 
   ## 示例
 
-'''cpp
+```cpp
   vector<int> v = {3, 1, 2};
 
   v.push_back(4);
@@ -97,7 +97,7 @@ abbrlink: ''
   {
       cout << x << " ";
   }
-'''
+```
 
   ## 复杂度
 
@@ -113,7 +113,7 @@ abbrlink: ''
 
   deque 是双端队列，支持头尾快速插入删除，也支持随机访问。
 
-  'deque<int> dq;'
+  `deque<int> dq;`
 
   ## 常用成员函数
 
@@ -136,7 +136,7 @@ abbrlink: ''
 
   ## 常见用途
 
-'''cpp
+```cpp
   deque<int> dq;
 
   dq.push_back(1);
@@ -144,7 +144,7 @@ abbrlink: ''
 
   cout << dq.front(); // 2
   cout << dq.back();  // 1
-'''
+```
 
   常用于：
 
@@ -174,7 +174,7 @@ abbrlink: ''
 
   ## 示例
 
-'''cpp
+```cpp
   stack<int> st;
 
   st.push(1);
@@ -183,7 +183,7 @@ abbrlink: ''
   cout << st.top(); // 2
   st.pop();
   cout << st.top(); // 1
-'''
+```
 
   注意：stack 不能随机访问，也不能直接遍历。
 
@@ -193,7 +193,7 @@ abbrlink: ''
 
   queue 是队列，特点是 先进先出。
 
-  'queue<int> q;'
+  `queue<int> q;`
 
   ## 常用成员函数
 
@@ -209,7 +209,7 @@ abbrlink: ''
 
   ## 示例
 
-'''cpp
+```cpp
   queue<int> q;
 
   q.push(1);
@@ -218,7 +218,7 @@ abbrlink: ''
   cout << q.front(); // 1
   q.pop();
   cout << q.front(); // 2
-'''
+```
 
   常用于 BFS。
 
@@ -228,7 +228,7 @@ abbrlink: ''
 
   priority_queue 是优先队列，默认是 大根堆。
 
-  'priority_queue<int> pq;'
+  `priority_queue<int> pq;`
 
   ## 常用成员函数
 
@@ -243,15 +243,15 @@ abbrlink: ''
 
   ## 大根堆
 
-  'priority_queue<int> pq;'
+  `priority_queue<int> pq;`
 
   ## 小根堆
 
- ' priority_queue<int, vector<int>, greater<int>> pq;'
+ ` priority_queue<int, vector<int>, greater<int>> pq;`
 
   ## 示例
 
-'''cpp
+```cpp
   priority_queue<int> pq;
 
   pq.push(3);
@@ -259,7 +259,7 @@ abbrlink: ''
   pq.push(5);
 
   cout << pq.top(); // 5
-'''
+```
 
   常用于：
 
@@ -278,7 +278,7 @@ abbrlink: ''
 
   默认按照 key 升序排列。
 
- ' map<int, int> mp;'
+ ` map<int, int> mp;`
 
   ## 常用成员函数
 
@@ -301,7 +301,7 @@ abbrlink: ''
 
   ## 示例：统计次数
 
-'''cpp
+```cpp
   map<int, int> mp;
 
   mp[5]++;
@@ -309,16 +309,16 @@ abbrlink: ''
   mp[5]++;
 
   cout << mp[5]; // 2
-'''
+```
 
   ## 遍历
 
-'''cpp
+```cpp
   for(auto x : mp)
   {
       cout << x.first << " " << x.second << endl;
   }
-'''
+```
 
   | 写法 | 含义 |
   |---|---|
@@ -339,7 +339,7 @@ abbrlink: ''
 
   unordered_map 是无序映射，不会按照 key 排序，但平均速度更快。
 
-  'unordered_map<int, int> mp;'
+  `unordered_map<int, int> mp;`
 
   ## 常用成员函数
 
@@ -368,7 +368,7 @@ abbrlink: ''
 
   set 是有序集合，自动去重。
 
-  'set<int> s;'
+  `set<int> s;`
 
   ## 常用成员函数
 
@@ -389,7 +389,7 @@ abbrlink: ''
 
   ## 示例
 
-'''cpp
+```cpp
   set<int> s;
 
   s.insert(3);
@@ -400,18 +400,18 @@ abbrlink: ''
   {
       cout << x << " ";
   }
-'''
+```
 
   输出：
 
-  '1 3'
+  `1 3`
 
 
   # 、multiset
 
   multiset 是有序集合，但允许重复元素。
 
-  'multiset<int> s;'
+  `multiset<int> s;`
 
   ## 常用函数
 
@@ -427,18 +427,18 @@ abbrlink: ''
 
   ## 删除一个元素
 
-'''cpp
+```cpp
   auto it = s.find(x);
 
   if(it != s.end())
   {
       s.erase(it);
   }
-'''
+```
 
   注意：
 
-  's.erase(x);'
+  `s.erase(x);`
 
   会删除所有值为 x 的元素。
 
@@ -447,7 +447,7 @@ abbrlink: ''
 
   unordered_set 是无序集合，自动去重，平均查找速度快。
 
-  'unordered_set<int> s;'
+  `unordered_set<int> s;`
 
   ## 常用成员函数
 
@@ -468,7 +468,7 @@ abbrlink: ''
 
   string 是字符串类，比字符数组更方便。
 
-  'string s = "hello";'
+  `string s = "hello";`
 
   ## 常用成员函数
 
@@ -495,7 +495,7 @@ abbrlink: ''
 
   ## 示例
 
-'''cpp
+```cpp
   string s = "abcdef";
 
   cout << s.substr(1, 3); // bcd
@@ -504,32 +504,32 @@ abbrlink: ''
   {
       cout << "found";
   }
-'''
+```
 
 
   # pair
 
   pair 用来存储两个值。
 
-  'pair<int, int> p = {1, 2};'
+  `pair<int, int> p = {1, 2};`
 
   ## 常用写法
 
-'''cpp
+```cpp
   cout << p.first;
   cout << p.second;
-'''
+```
 
   ## 示例
 
-'''cpp
+```cpp
   vector<pair<int, int>> v;
 
   v.push_back({2, 3});
   v.push_back({1, 5});
 
   sort(v.begin(), v.end());
-'''
+```
 
   pair 默认排序规则：
 
@@ -544,10 +544,10 @@ abbrlink: ''
 
   bitset 是固定长度的二进制位集合。
 
-'''cpp
+```cpp
   bitset<8> b;
   bitset<8> b(5);
-'''
+```
 
   ## 常用成员函数
 
@@ -569,23 +569,23 @@ abbrlink: ''
 
   ## 示例
 
-'''cpp
+```cpp
   bitset<8> b(5);
 
   cout << b << endl;        // 00000101
   cout << b.count() << endl; // 2
-'''
+```
 
 
   # 常用 algorithm 函数
 
   使用算法函数需要：
 
-  '#include <algorithm>'
+  `#include <algorithm>`
 
   如果使用：
 
-  '#include <bits/stdc++.h>'
+  `#include <bits/stdc++.h>`
 
   则不需要额外包含。
 
@@ -613,7 +613,7 @@ abbrlink: ''
 
   ## 示例
 
-'''cpp
+```cpp
   vector<int> v = {1, 2, 2, 3, 4};
 
   sort(v.begin(), v.end());
@@ -621,14 +621,14 @@ abbrlink: ''
   int pos = lower_bound(v.begin(), v.end(), 3) - v.begin();
 
   v.erase(unique(v.begin(), v.end()), v.end());
-'''
+```
 
 
   # numeric 常用函数
 
   需要头文件：
 
-  '#include <numeric>'
+  `#include <numeric>`
 
   ## 常用函数
 
@@ -641,13 +641,13 @@ abbrlink: ''
 
   ## 示例
 
-'''cpp
+```cpp
   vector<int> v = {1, 2, 3, 4};
 
   int sum = accumulate(v.begin(), v.end(), 0);
 
   cout << sum; // 10
-'''
+```
 
 
   # 容器选择建议
@@ -673,35 +673,35 @@ abbrlink: ''
 
   ## 1. map[key] 会自动创建元素
 
-'''cpp
+```cpp
   map<int, int> mp;
 
   cout << mp[100];
-'''
+```
 
   如果 100 不存在，会自动创建：
 
-  'mp[100] = 0;'
+  `mp[100] = 0;`
 
   如果只是判断是否存在，建议用：
 
-'''cpp
+```cpp
   if(mp.count(100))
   {
       cout << "exists";
   }
-'''
+```
 
 
   ## 2. pop() 不会返回元素
 
   错误写法：
 
-  'int x = q.pop(); // 错误'
+  `int x = q.pop(); // 错误`
 
   正确写法：
 
-'''cpp
+```cpp
   int x = q.front();
   q.pop();
 
@@ -709,26 +709,26 @@ abbrlink: ''
 
   int x = st.top();
   st.pop();
-'''
+```
 
 
   ## 3. unique 需要配合 erase
 
-'''cpp
+```cpp
   sort(v.begin(), v.end());
 
   v.erase(unique(v.begin(), v.end()), v.end());
-'''
+```
 
   unique 只会把重复元素移到后面，不会真正删除。
 
   ## 4. lower_bound 和 upper_bound 要求有序
 
-'''cpp
+```cpp
   sort(v.begin(), v.end());
 
   auto it = lower_bound(v.begin(), v.end(), x);
-'''
+```
 
   如果数组没有排序，二分结果没有意义。
 
