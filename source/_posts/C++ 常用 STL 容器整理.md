@@ -1,971 +1,718 @@
 ---
 title: 'C++ 常用 STL 容器整理'
 date: '2026-05-20T19:47:54+08:00'
-updated: '2026-05-20T19:50:20+08:00'
+updated: '2026-05-20T19:55:14+08:00'
 abbrlink: ''
 ---
-# C++ 常用 STL 容器整理
+# C++ 常用 STL 容器与函数整理
+
+  ## 一、STL 简介
+
+  STL，全称 Standard Template Library，即标准模板库。
+
+  常用内容主要包括：
 
-## 1\. vector
+  | 类型 | 代表内容 |
+  |---|---|
+  | 顺序容器 | vector、deque、list |
+  | 容器适配器 | stack、queue、priority_queue |
+  | 关联容器 | set、map、multiset、multimap |
+  | 无序关联容器 | unordered_set、unordered_map |
+  | 字符串 | string |
+  | 工具类型 | pair、tuple |
+  | 常用算法 | sort、reverse、lower_bound、unique |
+
+  竞赛常用万能头文件：
+
+  #include <bits/stdc++.h>
+  using namespace std;
+
+  ———
+
+  # 二、常用容器总览
+
+  | 容器 | 特点 | 常见用途 |
+  |---|---|---|
+  | vector | 动态数组，支持随机访问 | 存数组、邻接表 |
+  | deque | 双端队列，头尾都能快速插删 | 滑动窗口、单调队列 |
+  | stack | 后进先出 | 括号匹配、DFS |
+  | queue | 先进先出 | BFS |
+  | priority_queue | 优先队列，默认大根堆 | 贪心、Dijkstra |
+  | map | 有序键值对 | 计数、映射 |
+  | unordered_map | 无序键值对，平均更快 | 快速计数、查找 |
+  | set | 有序去重集合 | 去重、排序、查找 |
+  | multiset | 有序可重复集合 | 维护可重复数据 |
+  | unordered_set | 无序去重集合 | 快速判重 |
+  | string | 字符串 | 文本处理 |
+  | bitset | 二进制位集合 | 状态压缩、位运算 |
+
+  ———
+
+  # 三、vector
+
+  vector 是动态数组，支持随机访问。
 
-vector 是动态数组，支持随机访问，尾部插入删除效率高。
+  vector<int> v;
+  vector<int> v(n);
+  vector<int> v(n, 0);
 
-vector
+  ## 常用成员函数
 
-常用成员函数：
+  | 函数 | 作用 |
+  |---|---|
+  | v.push_back(x) | 尾部插入元素 |
+  | v.emplace_back(x) | 尾部原地构造元素 |
+  | v.pop_back() | 删除最后一个元素 |
+  | v.size() | 返回元素个数 |
+  | v.empty() | 判断是否为空 |
+  | v.clear() | 清空所有元素 |
+  | v.resize(n) | 修改大小为 n |
+  | v.reserve(n) | 预留容量 |
+  | v.capacity() | 返回当前容量 |
+  | v.front() | 返回第一个元素 |
+  | v.back() | 返回最后一个元素 |
+  | v[i] | 访问第 i 个元素 |
+  | v.at(i) | 安全访问，越界会报错 |
+  | v.begin() | 首元素迭代器 |
+  | v.end() | 尾后迭代器 |
+  | v.insert(pos, x) | 在 pos 位置插入 |
+  | v.erase(pos) | 删除指定位置元素 |
+  | v.erase(l, r) | 删除区间 [l, r) |
+  | v.swap(other) | 交换两个 vector |
 
-v.push\_back(x)
+  ## 示例
 
-尾部插入
+  vector<int> v = {3, 1, 2};
 
-v.emplace\_back(x)
+  v.push_back(4);
+  v.pop_back();
 
-尾部原地构造
+  sort(v.begin(), v.end());
 
-v.pop\_back()
+  for(auto x : v)
+  {
+      cout << x << " ";
+  }
 
-删除尾部元素
+  ## 复杂度
 
-v.size()
+  | 操作 | 复杂度 |
+  |---|---|
+  | 随机访问 | O(1) |
+  | 尾部插入 | 平均 O(1) |
+  | 中间插入/删除 | O(n) |
 
-元素个数
+  ———
 
-v.empty()
+  # 四、deque
 
-判断是否为空
+  deque 是双端队列，支持头尾快速插入删除，也支持随机访问。
 
-v.clear()
+  deque<int> dq;
 
-清空
+  ## 常用成员函数
 
-v.resize(n)
+  | 函数 | 作用 |
+  |---|---|
+  | dq.push_back(x) | 尾部插入 |
+  | dq.push_front(x) | 头部插入 |
+  | dq.pop_back() | 删除尾部 |
+  | dq.pop_front() | 删除头部 |
+  | dq.front() | 返回队首 |
+  | dq.back() | 返回队尾 |
+  | dq[i] | 随机访问 |
+  | dq.at(i) | 安全随机访问 |
+  | dq.size() | 元素个数 |
+  | dq.empty() | 是否为空 |
+  | dq.clear() | 清空 |
+  | dq.insert(pos, x) | 指定位置插入 |
+  | dq.erase(pos) | 删除指定位置 |
+  | dq.begin() / dq.end() | 迭代器 |
 
-改变大小
+  ## 常见用途
 
-v.reserve(n)
+  deque<int> dq;
 
-预留容量
+  dq.push_back(1);
+  dq.push_front(2);
 
-v.capacity()
+  cout << dq.front(); // 2
+  cout << dq.back();  // 1
 
-当前容量
+  常用于：
 
-v.front()
+  | 场景 | 说明 |
+  |---|---|
+  | 滑动窗口 | 维护区间最大值/最小值 |
+  | 单调队列 | 队列内元素保持单调 |
+  | 双端操作 | 头尾都需要插入删除 |
 
-第一个元素
+  ———
 
-v.back()
+  # 五、stack
 
-最后一个元素
+  stack 是栈，特点是 后进先出。
 
-v\[i\]
+  stack<int> st;
 
-访问第 i 个元素
+  ## 常用成员函数
 
-v.at(i)
+  | 函数 | 作用 |
+  |---|---|
+  | st.push(x) | 入栈 |
+  | st.emplace(x) | 原地构造入栈 |
+  | st.pop() | 出栈 |
+  | st.top() | 返回栈顶 |
+  | st.size() | 元素个数 |
+  | st.empty() | 是否为空 |
 
-访问第 i 个元素，越界会报错
+  ## 示例
 
-v.begin()
+  stack<int> st;
 
-首元素迭代器
+  st.push(1);
+  st.push(2);
 
-v.end()
+  cout << st.top(); // 2
+  st.pop();
+  cout << st.top(); // 1
 
-尾后迭代器
+  注意：stack 不能随机访问，也不能直接遍历。
 
-v.insert(pos, x)
+  ———
 
-在指定位置插入
+  # 六、queue
 
-v.erase(pos)
+  queue 是队列，特点是 先进先出。
 
-删除指定位置
+  queue<int> q;
 
-v.erase(l, r)
+  ## 常用成员函数
 
-删除区间 \[l, r)
+  | 函数 | 作用 |
+  |---|---|
+  | q.push(x) | 入队 |
+  | q.emplace(x) | 原地构造入队 |
+  | q.pop() | 出队 |
+  | q.front() | 返回队首 |
+  | q.back() | 返回队尾 |
+  | q.size() | 元素个数 |
+  | q.empty() | 是否为空 |
 
-v.swap(other)
+  ## 示例
 
-交换两个 vector
+  queue<int> q;
 
-例子：
+  q.push(1);
+  q.push(2);
 
-vector
+  cout << q.front(); // 1
+  q.pop();
+  cout << q.front(); // 2
 
-v.push\_back(4); v.pop\_back();
+  常用于 BFS。
 
-v.insert(v.begin() + 1, 10); v.erase(v.begin());
+  ———
 
-sort(v.begin(), v.end());
+  # 七、priority_queue
 
-复杂度：
+  priority_queue 是优先队列，默认是 大根堆。
 
-随机访问
+  priority_queue<int> pq;
 
-O(1)
+  ## 常用成员函数
 
-尾部插入
+  | 函数 | 作用 |
+  |---|---|
+  | pq.push(x) | 插入元素 |
+  | pq.emplace(x) | 原地构造插入 |
+  | pq.pop() | 删除堆顶 |
+  | pq.top() | 返回堆顶 |
+  | pq.size() | 元素个数 |
+  | pq.empty() | 是否为空 |
 
-平均 O(1)
+  ## 大根堆
 
-中间插入/删除
+  priority_queue<int> pq;
 
-O(n)
+  ## 小根堆
 
-———
+  priority_queue<int, vector<int>, greater<int>> pq;
 
-## 2\. deque
+  ## 示例
 
-deque 是双端队列，支持头尾高效插入删除，也支持随机访问。
+  priority_queue<int> pq;
 
-deque
+  pq.push(3);
+  pq.push(1);
+  pq.push(5);
 
-常用成员函数：
+  cout << pq.top(); // 5
 
-dq.push\_back(x)
+  常用于：
 
-尾部插入
+  | 场景 | 说明 |
+  |---|---|
+  | 贪心 | 每次取最大/最小 |
+  | Dijkstra | 维护当前最短距离 |
+  | Top K | 维护前 K 大/小 |
 
-dq.push\_front(x)
+  ———
 
-头部插入
+  # 八、map
 
-dq.pop\_back()
+  map 是有序映射，存储键值对：
 
-删除尾部
+  key -> value
 
-dq.pop\_front()
+  默认按照 key 升序排列。
 
-删除头部
+  map<int, int> mp;
 
-dq.front()
+  ## 常用成员函数
 
-队首元素
+  | 函数 | 作用 |
+  |---|---|
+  | mp[key] | 访问或创建 key 对应的值 |
+  | mp.at(key) | 访问 key，不存在会报错 |
+  | mp.insert({key, value}) | 插入键值对 |
+  | mp.emplace(key, value) | 原地构造插入 |
+  | mp.erase(key) | 删除指定 key |
+  | mp.erase(it) | 删除迭代器位置 |
+  | mp.find(key) | 查找 key |
+  | mp.count(key) | 判断 key 是否存在 |
+  | mp.lower_bound(key) | 第一个 >= key 的位置 |
+  | mp.upper_bound(key) | 第一个 > key 的位置 |
+  | mp.size() | 元素个数 |
+  | mp.empty() | 是否为空 |
+  | mp.clear() | 清空 |
+  | mp.begin() / mp.end() | 迭代器 |
 
-dq.back()
+  ## 示例：统计次数
 
-队尾元素
+  map<int, int> mp;
 
-dq\[i\]
+  mp[5]++;
+  mp[3]++;
+  mp[5]++;
 
-随机访问
+  cout << mp[5]; // 2
 
-dq.at(i)
+  ## 遍历
 
-安全随机访问
+  for(auto x : mp)
+  {
+      cout << x.first << " " << x.second << endl;
+  }
 
-dq.size()
+  | 写法 | 含义 |
+  |---|---|
+  | x.first | key |
+  | x.second | value |
 
-元素个数
+  复杂度：
 
-dq.empty()
+  | 操作 | 复杂度 |
+  |---|---|
+  | 插入 | O(log n) |
+  | 删除 | O(log n) |
+  | 查找 | O(log n) |
 
-是否为空
+  ———
 
-dq.clear()
+  # 九、unordered_map
 
-清空
+  unordered_map 是无序映射，不会按照 key 排序，但平均速度更快。
 
-dq.insert(pos, x)
+  unordered_map<int, int> mp;
 
-指定位置插入
+  ## 常用成员函数
 
-dq.erase(pos)
+  | 函数 | 作用 |
+  |---|---|
+  | mp[key] | 访问或创建 |
+  | mp.insert({key, value}) | 插入 |
+  | mp.emplace(key, value) | 原地插入 |
+  | mp.erase(key) | 删除 |
+  | mp.find(key) | 查找 |
+  | mp.count(key) | 判断是否存在 |
+  | mp.size() | 元素个数 |
+  | mp.empty() | 是否为空 |
+  | mp.clear() | 清空 |
 
-删除指定位置
+  ## map 和 unordered_map 对比
 
-dq.begin() / dq.end()
+  | 容器 | 是否有序 | 查找复杂度 | 底层结构 |
+  |---|---|---|---|
+  | map | 有序 | O(log n) | 红黑树 |
+  | unordered_map | 无序 | 平均 O(1) | 哈希表 |
 
-迭代器
+  ———
 
-常用于单调队列、滑动窗口。
+  # 十、set
 
-———
+  set 是有序集合，自动去重。
 
-## 3\. stack
+  set<int> s;
 
-stack 是栈，后进先出，LIFO。
+  ## 常用成员函数
 
-stack
+  | 函数 | 作用 |
+  |---|---|
+  | s.insert(x) | 插入元素 |
+  | s.emplace(x) | 原地插入 |
+  | s.erase(x) | 删除值为 x 的元素 |
+  | s.erase(it) | 删除迭代器位置 |
+  | s.find(x) | 查找元素 |
+  | s.count(x) | 判断元素是否存在 |
+  | s.lower_bound(x) | 第一个 >= x 的位置 |
+  | s.upper_bound(x) | 第一个 > x 的位置 |
+  | s.size() | 元素个数 |
+  | s.empty() | 是否为空 |
+  | s.clear() | 清空 |
+  | s.begin() / s.end() | 迭代器 |
 
-常用成员函数：
+  ## 示例
 
-st.push(x)
+  set<int> s;
 
-入栈
+  s.insert(3);
+  s.insert(1);
+  s.insert(3);
 
-st.emplace(x)
+  for(auto x : s)
+  {
+      cout << x << " ";
+  }
 
-原地构造入栈
+  输出：
 
-st.pop()
+  1 3
 
-出栈
+  ———
 
-st.top()
+  # 十一、multiset
 
-栈顶元素
+  multiset 是有序集合，但允许重复元素。
 
-st.size()
+  multiset<int> s;
 
-元素个数
+  ## 常用函数
 
-st.empty()
+  | 函数 | 作用 |
+  |---|---|
+  | s.insert(x) | 插入 |
+  | s.erase(x) | 删除所有值为 x 的元素 |
+  | s.erase(it) | 删除某一个位置的元素 |
+  | s.find(x) | 查找 |
+  | s.count(x) | 统计出现次数 |
+  | s.lower_bound(x) | 第一个 >= x 的位置 |
+  | s.upper_bound(x) | 第一个 > x 的位置 |
 
-是否为空
+  ## 删除一个元素
 
-注意：stack 不能遍历，也不能随机访问。
+  auto it = s.find(x);
 
-———
+  if(it != s.end())
+  {
+      s.erase(it);
+  }
 
-## 4\. queue
+  注意：
 
-queue 是队列，先进先出，FIFO。
+  s.erase(x);
 
-queue
+  会删除所有值为 x 的元素。
 
-常用成员函数：
+  ———
 
-q.push(x)
+  # 十二、unordered_set
 
-入队
+  unordered_set 是无序集合，自动去重，平均查找速度快。
 
-q.emplace(x)
+  unordered_set<int> s;
 
-原地构造入队
+  ## 常用成员函数
 
-q.pop()
+  | 函数 | 作用 |
+  |---|---|
+  | s.insert(x) | 插入 |
+  | s.erase(x) | 删除 |
+  | s.find(x) | 查找 |
+  | s.count(x) | 判断是否存在 |
+  | s.size() | 元素个数 |
+  | s.empty() | 是否为空 |
+  | s.clear() | 清空 |
 
-出队
+  适合只需要快速判断某个元素是否出现过的场景。
 
-q.front()
+  ———
 
-队首元素
+  # 十三、string
 
-q.back()
+  string 是字符串类，比字符数组更方便。
 
-队尾元素
+  string s = "hello";
 
-q.size()
+  ## 常用成员函数
 
-元素个数
+  | 函数 | 作用 |
+  |---|---|
+  | s.size() / s.length() | 字符串长度 |
+  | s.empty() | 是否为空 |
+  | s.clear() | 清空 |
+  | s[i] | 访问字符 |
+  | s.at(i) | 安全访问 |
+  | s.front() | 第一个字符 |
+  | s.back() | 最后一个字符 |
+  | s.push_back(c) | 尾部添加字符 |
+  | s.pop_back() | 删除最后一个字符 |
+  | s += t | 拼接字符串 |
+  | s.append(t) | 拼接字符串 |
+  | s.insert(pos, t) | 插入字符串 |
+  | s.erase(pos, len) | 删除子串 |
+  | s.replace(pos, len, t) | 替换子串 |
+  | s.substr(pos, len) | 截取子串 |
+  | s.find(t) | 查找第一次出现位置 |
+  | s.rfind(t) | 查找最后一次出现位置 |
+  | s.c_str() | 转成 C 风格字符串 |
 
-q.empty()
+  ## 示例
 
-是否为空
+  string s = "abcdef";
 
-常用于 BFS。
+  cout << s.substr(1, 3); // bcd
 
-———
+  if(s.find("cd") != string::npos)
+  {
+      cout << "found";
+  }
 
-## 5\. priority\_queue
+  ———
 
-priority\_queue 是优先队列，默认是大根堆。
+  # 十四、pair
 
-priority\_queue
+  pair 用来存储两个值。
 
-常用成员函数：
+  pair<int, int> p = {1, 2};
 
-pq.push(x)
+  ## 常用写法
 
-插入
+  cout << p.first;
+  cout << p.second;
 
-pq.emplace(x)
+  ## 示例
 
-原地构造插入
+  vector<pair<int, int>> v;
 
-pq.pop()
+  v.push_back({2, 3});
+  v.push_back({1, 5});
 
-删除堆顶
+  sort(v.begin(), v.end());
 
-pq.top()
+  pair 默认排序规则：
 
-访问堆顶
+  | 优先级 | 规则 |
+  |---|---|
+  | 第一关键字 | 按 first 排序 |
+  | 第二关键字 | first 相同，按 second 排序 |
 
-pq.size()
+  ———
 
-元素个数
+  # 十五、bitset
 
-pq.empty()
+  bitset 是固定长度的二进制位集合。
 
-是否为空
+  bitset<8> b;
+  bitset<8> b(5);
 
-大根堆：
+  ## 常用成员函数
 
-priority\_queue
+  | 函数 | 作用 |
+  |---|---|
+  | b.set() | 全部置为 1 |
+  | b.set(pos) | 指定位置置为 1 |
+  | b.reset() | 全部置为 0 |
+  | b.reset(pos) | 指定位置置为 0 |
+  | b.flip() | 全部取反 |
+  | b.flip(pos) | 指定位置取反 |
+  | b.count() | 统计 1 的个数 |
+  | b.any() | 是否存在 1 |
+  | b.none() | 是否全为 0 |
+  | b.all() | 是否全为 1 |
+  | b.test(pos) | 判断某位是否为 1 |
+  | b.to_string() | 转字符串 |
+  | b.to_ulong() | 转整数 |
 
-小根堆：
+  ## 示例
 
-priority\_queue<int, vector
+  bitset<8> b(5);
 
-常用于贪心、Dijkstra、Top K。
+  cout << b << endl;        // 00000101
+  cout << b.count() << endl; // 2
 
-———
+  ———
 
-## 6\. map
+  # 十六、常用 algorithm 函数
 
-map 是有序映射，存储键值对，按照 key 自动升序排序。
+  使用算法函数需要：
 
-map<int, int> mp;
+  #include <algorithm>
 
-常用成员函数：
+  如果使用：
 
-mp\[key\]
+  #include <bits/stdc++.h>
 
-访问或创建 key 对应的 value
+  则不需要额外包含。
 
-mp.at(key)
+  ## 常用函数表
 
-访问 key，对不存在的 key 会报错
+  | 函数 | 作用 |
+  |---|---|
+  | sort(l, r) | 排序 |
+  | stable_sort(l, r) | 稳定排序 |
+  | reverse(l, r) | 翻转 |
+  | unique(l, r) | 去除连续重复元素 |
+  | lower_bound(l, r, x) | 第一个 >= x 的位置 |
+  | upper_bound(l, r, x) | 第一个 > x 的位置 |
+  | binary_search(l, r, x) | 判断是否存在 |
+  | max(a, b) | 最大值 |
+  | min(a, b) | 最小值 |
+  | max_element(l, r) | 最大元素位置 |
+  | min_element(l, r) | 最小元素位置 |
+  | swap(a, b) | 交换 |
+  | next_permutation(l, r) | 下一个排列 |
+  | prev_permutation(l, r) | 上一个排列 |
+  | count(l, r, x) | 统计出现次数 |
+  | find(l, r, x) | 查找元素 |
+  | fill(l, r, x) | 区间填充 |
 
-mp.insert({key, value})
+  ## 示例
 
-插入键值对
+  vector<int> v = {1, 2, 2, 3, 4};
 
-mp.emplace(key, value)
+  sort(v.begin(), v.end());
 
-原地构造插入
+  int pos = lower_bound(v.begin(), v.end(), 3) - v.begin();
 
-mp.erase(key)
+  v.erase(unique(v.begin(), v.end()), v.end());
 
-删除指定 key
+  ———
 
-mp.erase(it)
+  # 十七、numeric 常用函数
 
-删除迭代器位置
+  需要头文件：
 
-mp.find(key)
+  #include <numeric>
 
-查找 key
+  ## 常用函数
 
-mp.count(key)
+  | 函数 | 作用 |
+  |---|---|
+  | accumulate(l, r, init) | 区间求和 |
+  | gcd(a, b) | 最大公约数 |
+  | lcm(a, b) | 最小公倍数 |
+  | iota(l, r, start) | 递增赋值 |
 
-判断 key 是否存在
+  ## 示例
 
-mp.lower\_bound(key)
+  vector<int> v = {1, 2, 3, 4};
 
-第一个 >= key 的位置
+  int sum = accumulate(v.begin(), v.end(), 0);
 
-mp.upper\_bound(key)
+  cout << sum; // 10
 
-第一个 > key 的位置
+  ———
 
-mp.size()
+  # 十八、容器选择建议
 
-元素个数
+  | 需求 | 推荐容器 |
+  |---|---|
+  | 动态数组 | vector |
+  | 头尾插入删除 | deque |
+  | 后进先出 | stack |
+  | 先进先出 | queue |
+  | 每次取最大值/最小值 | priority_queue |
+  | 键值映射并保持有序 | map |
+  | 快速键值映射 | unordered_map |
+  | 去重并排序 | set |
+  | 可重复并排序 | multiset |
+  | 快速去重 | unordered_set |
+  | 字符串处理 | string |
+  | 二进制状态处理 | bitset |
+  | 存两个相关数据 | pair |
 
-mp.empty()
+  ———
 
-是否为空
+  # 十九、常见注意事项
 
-mp.clear()
+  ## 1. map[key] 会自动创建元素
 
-清空
+  map<int, int> mp;
 
-mp.begin() / mp.end()
+  cout << mp[100];
 
-迭代器
+  如果 100 不存在，会自动创建：
 
-例子：
+  mp[100] = 0;
 
-map<int, int> mp;
+  如果只是判断是否存在，建议用：
 
-mp\[5\]++; mp\[3\] = 10;
+  if(mp.count(100))
+  {
+      cout << "exists";
+  }
 
-if(mp.count(5)) { cout << mp\[5\]; }
+  ———
 
-for(auto x : mp) { cout << x.first << " " << x.second << endl; }
+  ## 2. pop() 不会返回元素
 
-复杂度：插入、删除、查找都是 O(log n)。
+  错误写法：
 
-———
+  int x = q.pop(); // 错误
 
-## 7\. unordered\_map
+  正确写法：
 
-unordered\_map 是无序映射，不排序，平均查找速度更快。
+  int x = q.front();
+  q.pop();
 
-unordered\_map<int, int> mp;
+  stack 同理：
 
-常用成员函数基本和 map 类似：
+  int x = st.top();
+  st.pop();
 
-mp\[key\]
+  ———
 
-访问或创建
+  ## 3. unique 需要配合 erase
 
-mp.insert({key, value})
+  sort(v.begin(), v.end());
 
-插入
+  v.erase(unique(v.begin(), v.end()), v.end());
 
-mp.emplace(key, value)
+  unique 只会把重复元素移到后面，不会真正删除。
 
-原地插入
+  ———
 
-mp.erase(key)
+  ## 4. lower_bound 和 upper_bound 要求有序
 
-删除
+  sort(v.begin(), v.end());
 
-mp.find(key)
+  auto it = lower_bound(v.begin(), v.end(), x);
 
-查找
+  如果数组没有排序，二分结果没有意义。
 
-mp.count(key)
+  ———
 
-判断是否存在
+  # 二十、总结
 
-mp.size()
+  STL 可以大幅减少手写数据结构的时间。
 
-元素个数
-
-mp.empty()
-
-是否为空
-
-mp.clear()
-
-清空
-
-区别：
-
-map
-
-有序
-
-O(log n)
-
-unordered\_map
-
-无序
-
-平均 O(1)，最坏 O(n)
-
-———
-
-## 8\. set
-
-set 是有序集合，自动去重，默认升序。
-
-set
-
-常用成员函数：
-
-s.insert(x)
-
-插入
-
-s.emplace(x)
-
-原地插入
-
-s.erase(x)
-
-删除值为 x 的元素
-
-s.erase(it)
-
-删除迭代器位置
-
-s.find(x)
-
-查找
-
-s.count(x)
-
-判断是否存在
-
-s.lower\_bound(x)
-
-第一个 >= x 的位置
-
-s.upper\_bound(x)
-
-第一个 > x 的位置
-
-s.size()
-
-元素个数
-
-s.empty()
-
-是否为空
-
-s.clear()
-
-清空
-
-s.begin() / s.end()
-
-迭代器
-
-例子：
-
-set
-
-s.insert(3); s.insert(1); s.insert(3);
-
-for(auto x : s) { cout << x << " "; }
-
-输出：
-
-1 3
-
-———
-
-## 9\. multiset
-
-multiset 是允许重复元素的有序集合。
-
-multiset
-
-常用函数和 set 基本一样：
-
-s.insert(x); s.erase(x); s.find(x); s.count(x); s.lower\_bound(x); s.upper\_bound(x);
-
-注意：
-
-s.erase(x);
-
-会删除所有值为 x 的元素。
-
-如果只想删除一个：
-
-auto it = s.find(x); if(it != s.end()) { s.erase(it); }
-
-———
-
-## 10\. unordered\_set
-
-unordered\_set 是无序集合，自动去重，不排序。
-
-unordered\_set
-
-常用成员函数：
-
-s.insert(x)
-
-插入
-
-s.erase(x)
-
-删除
-
-s.find(x)
-
-查找
-
-s.count(x)
-
-判断是否存在
-
-s.size()
-
-元素个数
-
-s.empty()
-
-是否为空
-
-s.clear()
-
-清空
-
-平均复杂度 O(1)。
-
-———
-
-## 11\. pair
-
-pair 用来存两个值。
-
-pair<int, int> p = {1, 2};
-
-常用访问：
-
-p.first; p.second;
-
-例子：
-
-vector<pair<int, int>> v;
-
-v.push\_back({2, 3}); v.push\_back({1, 5});
-
-sort(v.begin(), v.end());
-
-pair 默认排序规则：先按 first 排，first 相同再按 second 排。
-
-———
-
-## 12\. string
-
-string 是字符串类。
-
-string s = "hello";
-
-常用成员函数：
-
-s.size() / s.length()
-
-字符串长度
-
-s.empty()
-
-是否为空
-
-s.clear()
-
-清空
-
-s\[i\]
-
-访问字符
-
-s.at(i)
-
-安全访问
-
-s.front()
-
-第一个字符
-
-s.back()
-
-最后一个字符
-
-s.push\_back(c)
-
-尾部加字符
-
-s.pop\_back()
-
-删除尾部字符
-
-s += t
-
-拼接字符串
-
-s.append(t)
-
-拼接字符串
-
-s.insert(pos, t)
-
-插入字符串
-
-s.erase(pos, len)
-
-删除子串
-
-s.replace(pos, len, t)
-
-替换子串
-
-s.substr(pos, len)
-
-截取子串
-
-s.find(t)
-
-查找第一次出现位置
-
-s.rfind(t)
-
-查找最后一次出现位置
-
-s.c\_str()
-
-转成 C 风格字符串
-
-例子：
-
-string s = "abcdef";
-
-cout << s.substr(1, 3); // bcd
-
-if(s.find("cd") != string::npos) { cout << "found"; }
-
-———
-
-## 13\. bitset
-
-bitset 是固定长度的二进制位集合。
-
-bitset<8> b;
-
-常用成员函数：
-
-b.set()
-
-全部置为 1
-
-b.set(pos)
-
-指定位置置为 1
-
-b.reset()
-
-全部置为 0
-
-b.reset(pos)
-
-指定位置置为 0
-
-b.flip()
-
-全部取反
-
-b.flip(pos)
-
-指定位置取反
-
-b.count()
-
-统计 1 的个数
-
-b.any()
-
-是否存在 1
-
-b.none()
-
-是否全是 0
-
-b.all()
-
-是否全是 1
-
-b.test(pos)
-
-判断某位是否为 1
-
-b.to\_string()
-
-转字符串
-
-b.to\_ulong()
-
-转整数
-
-例子：
-
-bitset<8> b(5);
-
-cout << b; // 00000101 cout << b.count(); // 2
-
-———
-
-## 14\. list
-
-list 是双向链表，适合频繁在中间插入删除。
-
-list
-
-常用成员函数：
-
-l.push\_back(x)
-
-尾部插入
-
-l.push\_front(x)
-
-头部插入
-
-l.pop\_back()
-
-删除尾部
-
-l.pop\_front()
-
-删除头部
-
-l.insert(pos, x)
-
-指定位置插入
-
-l.erase(pos)
-
-删除指定位置
-
-l.remove(x)
-
-删除所有值为 x 的元素
-
-l.sort()
-
-排序
-
-l.reverse()
-
-翻转
-
-l.unique()
-
-删除连续重复元素
-
-l.merge(other)
-
-合并有序链表
-
-l.size()
-
-元素个数
-
-l.empty()
-
-是否为空
-
-l.clear()
-
-清空
-
-注意：list 不支持 l\[i\] 随机访问。
-
-———
-
-## 15\. 常用 algorithm 函数
-
-#include
-
-常用函数：
-
-sort(l, r)
-
-排序
-
-stable\_sort(l, r)
-
-稳定排序
-
-reverse(l, r)
-
-翻转
-
-unique(l, r)
-
-去除连续重复元素
-
-lower\_bound(l, r, x)
-
-第一个 >= x 的位置
-
-upper\_bound(l, r, x)
-
-第一个 > x 的位置
-
-binary\_search(l, r, x)
-
-二分查找
-
-max(a, b)
-
-最大值
-
-min(a, b)
-
-最小值
-
-max\_element(l, r)
-
-最大元素位置
-
-min\_element(l, r)
-
-最小元素位置
-
-swap(a, b)
-
-交换
-
-next\_permutation(l, r)
-
-下一个排列
-
-prev\_permutation(l, r)
-
-上一个排列
-
-count(l, r, x)
-
-统计 x 出现次数
-
-find(l, r, x)
-
-查找 x
-
-fill(l, r, x)
-
-区间填充
-
-accumulate(l, r, init)
-
-求和，需要
-
-例子：
-
-vector
-
-sort(v.begin(), v.end());
-
-int pos = lower\_bound(v.begin(), v.end(), 3) - v.begin();
-
-v.erase(unique(v.begin(), v.end()), v.end());
-
-———
-
-## 常用选择表
-
-动态数组
-
-vector
-
-头尾插入删除
-
-deque
-
-后进先出
-
-stack
-
-先进先出
-
-queue
-
-自动取最大/最小
-
-priority\_queue
-
-有序映射
-
-map
-
-快速映射
-
-unordered\_map
-
-有序去重
-
-set
-
-有序可重复
-
-multiset
-
-快速去重
-
-unordered\_set
-
-字符串处理
-
-string
-
-二进制位处理
-
-bitset
-
-存两个值
-
-pair
-
-频繁中间插入删除
-
-list
+  | 类型 | 推荐掌握程度 |
+  |---|---|
+  | vector | 必须熟练 |
+  | queue / stack | 必须熟练 |
+  | map / set | 必须熟练 |
+  | priority_queue | 必须熟练 |
+  | unordered_map / unordered_set | 建议熟练 |
+  | deque / bitset | 常见题型需要掌握 |
+  | algorithm 常用函数 | 必须熟练 |
