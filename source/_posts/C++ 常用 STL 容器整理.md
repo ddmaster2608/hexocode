@@ -1,12 +1,12 @@
 ---
 title: 'C++ 常用 STL 容器整理'
 date: '2026-05-20T19:47:54+08:00'
-updated: '2026-05-20T19:55:14+08:00'
+updated: '2026-05-20T20:11:05+08:00'
 abbrlink: ''
 ---
 # C++ 常用 STL 容器与函数整理
 
-  ## 一、STL 简介
+  ## STL 简介
 
   STL，全称 Standard Template Library，即标准模板库。
 
@@ -24,12 +24,13 @@ abbrlink: ''
 
   竞赛常用万能头文件：
 
+'''cpp
   #include <bits/stdc++.h>
   using namespace std;
+'''
 
-  ———
 
-  # 二、常用容器总览
+  # 常用容器总览
 
   | 容器 | 特点 | 常见用途 |
   |---|---|---|
@@ -46,15 +47,17 @@ abbrlink: ''
   | string | 字符串 | 文本处理 |
   | bitset | 二进制位集合 | 状态压缩、位运算 |
 
-  ———
 
-  # 三、vector
+
+  # vector
 
   vector 是动态数组，支持随机访问。
 
+'''cpp
   vector<int> v;
   vector<int> v(n);
   vector<int> v(n, 0);
+'''
 
   ## 常用成员函数
 
@@ -82,6 +85,7 @@ abbrlink: ''
 
   ## 示例
 
+'''cpp
   vector<int> v = {3, 1, 2};
 
   v.push_back(4);
@@ -93,6 +97,7 @@ abbrlink: ''
   {
       cout << x << " ";
   }
+'''
 
   ## 复杂度
 
@@ -102,13 +107,13 @@ abbrlink: ''
   | 尾部插入 | 平均 O(1) |
   | 中间插入/删除 | O(n) |
 
-  ———
 
-  # 四、deque
+
+  # deque
 
   deque 是双端队列，支持头尾快速插入删除，也支持随机访问。
 
-  deque<int> dq;
+  'deque<int> dq;'
 
   ## 常用成员函数
 
@@ -131,6 +136,7 @@ abbrlink: ''
 
   ## 常见用途
 
+'''cpp
   deque<int> dq;
 
   dq.push_back(1);
@@ -138,6 +144,7 @@ abbrlink: ''
 
   cout << dq.front(); // 2
   cout << dq.back();  // 1
+'''
 
   常用于：
 
@@ -147,9 +154,8 @@ abbrlink: ''
   | 单调队列 | 队列内元素保持单调 |
   | 双端操作 | 头尾都需要插入删除 |
 
-  ———
 
-  # 五、stack
+  # stack
 
   stack 是栈，特点是 后进先出。
 
@@ -168,6 +174,7 @@ abbrlink: ''
 
   ## 示例
 
+'''cpp
   stack<int> st;
 
   st.push(1);
@@ -176,16 +183,17 @@ abbrlink: ''
   cout << st.top(); // 2
   st.pop();
   cout << st.top(); // 1
+'''
 
   注意：stack 不能随机访问，也不能直接遍历。
 
-  ———
 
-  # 六、queue
+
+  # queue
 
   queue 是队列，特点是 先进先出。
 
-  queue<int> q;
+  'queue<int> q;'
 
   ## 常用成员函数
 
@@ -201,6 +209,7 @@ abbrlink: ''
 
   ## 示例
 
+'''cpp
   queue<int> q;
 
   q.push(1);
@@ -209,16 +218,17 @@ abbrlink: ''
   cout << q.front(); // 1
   q.pop();
   cout << q.front(); // 2
+'''
 
   常用于 BFS。
 
   ———
 
-  # 七、priority_queue
+  # priority_queue
 
   priority_queue 是优先队列，默认是 大根堆。
 
-  priority_queue<int> pq;
+  'priority_queue<int> pq;'
 
   ## 常用成员函数
 
@@ -233,14 +243,15 @@ abbrlink: ''
 
   ## 大根堆
 
-  priority_queue<int> pq;
+  'priority_queue<int> pq;'
 
   ## 小根堆
 
-  priority_queue<int, vector<int>, greater<int>> pq;
+ ' priority_queue<int, vector<int>, greater<int>> pq;'
 
   ## 示例
 
+'''cpp
   priority_queue<int> pq;
 
   pq.push(3);
@@ -248,6 +259,7 @@ abbrlink: ''
   pq.push(5);
 
   cout << pq.top(); // 5
+'''
 
   常用于：
 
@@ -257,9 +269,8 @@ abbrlink: ''
   | Dijkstra | 维护当前最短距离 |
   | Top K | 维护前 K 大/小 |
 
-  ———
 
-  # 八、map
+  # map
 
   map 是有序映射，存储键值对：
 
@@ -267,7 +278,7 @@ abbrlink: ''
 
   默认按照 key 升序排列。
 
-  map<int, int> mp;
+ ' map<int, int> mp;'
 
   ## 常用成员函数
 
@@ -290,6 +301,7 @@ abbrlink: ''
 
   ## 示例：统计次数
 
+'''cpp
   map<int, int> mp;
 
   mp[5]++;
@@ -297,13 +309,16 @@ abbrlink: ''
   mp[5]++;
 
   cout << mp[5]; // 2
+'''
 
   ## 遍历
 
+'''cpp
   for(auto x : mp)
   {
       cout << x.first << " " << x.second << endl;
   }
+'''
 
   | 写法 | 含义 |
   |---|---|
@@ -320,11 +335,11 @@ abbrlink: ''
 
   ———
 
-  # 九、unordered_map
+  # unordered_map
 
   unordered_map 是无序映射，不会按照 key 排序，但平均速度更快。
 
-  unordered_map<int, int> mp;
+  'unordered_map<int, int> mp;'
 
   ## 常用成员函数
 
@@ -349,11 +364,11 @@ abbrlink: ''
 
   ———
 
-  # 十、set
+  # set
 
   set 是有序集合，自动去重。
 
-  set<int> s;
+  'set<int> s;'
 
   ## 常用成员函数
 
@@ -374,6 +389,7 @@ abbrlink: ''
 
   ## 示例
 
+'''cpp
   set<int> s;
 
   s.insert(3);
@@ -384,18 +400,18 @@ abbrlink: ''
   {
       cout << x << " ";
   }
+'''
 
   输出：
 
-  1 3
+  '1 3'
 
-  ———
 
-  # 十一、multiset
+  # 、multiset
 
   multiset 是有序集合，但允许重复元素。
 
-  multiset<int> s;
+  'multiset<int> s;'
 
   ## 常用函数
 
@@ -411,26 +427,27 @@ abbrlink: ''
 
   ## 删除一个元素
 
+'''cpp
   auto it = s.find(x);
 
   if(it != s.end())
   {
       s.erase(it);
   }
+'''
 
   注意：
 
-  s.erase(x);
+  's.erase(x);'
 
   会删除所有值为 x 的元素。
 
-  ———
 
-  # 十二、unordered_set
+  # unordered_set
 
   unordered_set 是无序集合，自动去重，平均查找速度快。
 
-  unordered_set<int> s;
+  'unordered_set<int> s;'
 
   ## 常用成员函数
 
@@ -446,13 +463,12 @@ abbrlink: ''
 
   适合只需要快速判断某个元素是否出现过的场景。
 
-  ———
 
-  # 十三、string
+  # string
 
   string 是字符串类，比字符数组更方便。
 
-  string s = "hello";
+  'string s = "hello";'
 
   ## 常用成员函数
 
@@ -479,6 +495,7 @@ abbrlink: ''
 
   ## 示例
 
+'''cpp
   string s = "abcdef";
 
   cout << s.substr(1, 3); // bcd
@@ -487,28 +504,32 @@ abbrlink: ''
   {
       cout << "found";
   }
+'''
 
-  ———
 
-  # 十四、pair
+  # pair
 
   pair 用来存储两个值。
 
-  pair<int, int> p = {1, 2};
+  'pair<int, int> p = {1, 2};'
 
   ## 常用写法
 
+'''cpp
   cout << p.first;
   cout << p.second;
+'''
 
   ## 示例
 
+'''cpp
   vector<pair<int, int>> v;
 
   v.push_back({2, 3});
   v.push_back({1, 5});
 
   sort(v.begin(), v.end());
+'''
 
   pair 默认排序规则：
 
@@ -519,12 +540,14 @@ abbrlink: ''
 
   ———
 
-  # 十五、bitset
+  # bitset
 
   bitset 是固定长度的二进制位集合。
 
+'''cpp
   bitset<8> b;
   bitset<8> b(5);
+'''
 
   ## 常用成员函数
 
@@ -546,22 +569,23 @@ abbrlink: ''
 
   ## 示例
 
+'''cpp
   bitset<8> b(5);
 
   cout << b << endl;        // 00000101
   cout << b.count() << endl; // 2
+'''
 
-  ———
 
-  # 十六、常用 algorithm 函数
+  # 常用 algorithm 函数
 
   使用算法函数需要：
 
-  #include <algorithm>
+  '#include <algorithm>'
 
   如果使用：
 
-  #include <bits/stdc++.h>
+  '#include <bits/stdc++.h>'
 
   则不需要额外包含。
 
@@ -589,6 +613,7 @@ abbrlink: ''
 
   ## 示例
 
+'''cpp
   vector<int> v = {1, 2, 2, 3, 4};
 
   sort(v.begin(), v.end());
@@ -596,14 +621,14 @@ abbrlink: ''
   int pos = lower_bound(v.begin(), v.end(), 3) - v.begin();
 
   v.erase(unique(v.begin(), v.end()), v.end());
+'''
 
-  ———
 
-  # 十七、numeric 常用函数
+  # numeric 常用函数
 
   需要头文件：
 
-  #include <numeric>
+  '#include <numeric>'
 
   ## 常用函数
 
@@ -616,15 +641,16 @@ abbrlink: ''
 
   ## 示例
 
+'''cpp
   vector<int> v = {1, 2, 3, 4};
 
   int sum = accumulate(v.begin(), v.end(), 0);
 
   cout << sum; // 10
+'''
 
-  ———
 
-  # 十八、容器选择建议
+  # 容器选择建议
 
   | 需求 | 推荐容器 |
   |---|---|
@@ -642,37 +668,40 @@ abbrlink: ''
   | 二进制状态处理 | bitset |
   | 存两个相关数据 | pair |
 
-  ———
 
-  # 十九、常见注意事项
+  # 常见注意事项
 
   ## 1. map[key] 会自动创建元素
 
+'''cpp
   map<int, int> mp;
 
   cout << mp[100];
+'''
 
   如果 100 不存在，会自动创建：
 
-  mp[100] = 0;
+  'mp[100] = 0;'
 
   如果只是判断是否存在，建议用：
 
+'''cpp
   if(mp.count(100))
   {
       cout << "exists";
   }
+'''
 
-  ———
 
   ## 2. pop() 不会返回元素
 
   错误写法：
 
-  int x = q.pop(); // 错误
+  'int x = q.pop(); // 错误'
 
   正确写法：
 
+'''cpp
   int x = q.front();
   q.pop();
 
@@ -680,30 +709,31 @@ abbrlink: ''
 
   int x = st.top();
   st.pop();
+'''
 
-  ———
 
   ## 3. unique 需要配合 erase
 
+'''cpp
   sort(v.begin(), v.end());
 
   v.erase(unique(v.begin(), v.end()), v.end());
+'''
 
   unique 只会把重复元素移到后面，不会真正删除。
 
-  ———
-
   ## 4. lower_bound 和 upper_bound 要求有序
 
+'''cpp
   sort(v.begin(), v.end());
 
   auto it = lower_bound(v.begin(), v.end(), x);
+'''
 
   如果数组没有排序，二分结果没有意义。
 
-  ———
 
-  # 二十、总结
+  # 总结
 
   STL 可以大幅减少手写数据结构的时间。
 
