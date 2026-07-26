@@ -5,6 +5,7 @@
   const $ = (selector) => document.querySelector(selector);
 
   const views = {
+    overview: $('#view-overview'),
     posts: $('#view-posts'),
     editor: $('#view-editor'),
     images: $('#view-images'),
@@ -46,10 +47,58 @@
     return payload;
   }
 
+  function iconSvg(name) {
+    return `<svg class="i"><use href="#${name}"/></svg>`;
+  }
+
+  /* ═══════════ 生成式封面 ═══════════
+     没有封面的文章，用标题哈希确定性地生成一张小封面：
+     精选色板取主色 → 邻近色渐变 → 哈希位摆放装饰圆 → 标题首字水印 */
+
+  function hashString(value) {
+    let hash = 5381;
+    const text = String(value);
+    for (let i = 0; i < text.length; i += 1) {
+      hash = ((hash << 5) + hash + text.charCodeAt(i)) >>> 0;
+    }
+    return hash;
+  }
+
+  const COVER_HUES = [16, 34, 150, 205, 262, 336];
+
+  function generatedCover(title) {
+    const hash = hashString(title);
+    const hue = COVER_HUES[hash % COVER_HUES.length];
+    const hue2 = hue + 24 + ((hash >> 4) % 22);
+    const angle = (hash >> 6) % 360;
+    const cx1 = 16 + ((hash >> 10) % 56);
+    const cy1 = 8 + ((hash >> 14) % 42);
+    const r1 = 18 + ((hash >> 18) % 14);
+    const cx2 = 40 + ((hash >> 20) % 44);
+    const cy2 = 26 + ((hash >> 24) % 34);
+    const initial = [...String(title).trim()][0] || '?';
+    const gid = 'gc' + hash.toString(36);
+    return `<svg class="gen-cover" viewBox="0 0 88 66" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs><linearGradient id="${gid}" gradientTransform="rotate(${angle} 0.5 0.5)">
+        <stop offset="0" stop-color="hsl(${hue} 62% 66%)"/>
+        <stop offset="1" stop-color="hsl(${hue2} 58% 46%)"/>
+      </linearGradient></defs>
+      <rect width="88" height="66" fill="url(#${gid})"/>
+      <circle cx="${cx1}" cy="${cy1}" r="${r1}" fill="hsl(${hue2} 72% 82%)" opacity="0.32"/>
+      <circle cx="${cx2}" cy="${cy2}" r="14" fill="hsl(${hue} 75% 88%)" opacity="0.26"/>
+      <text x="44" y="43" text-anchor="middle" font-size="26" font-weight="600"
+        font-family="Georgia, 'STZhongsong', serif" fill="rgba(255,255,255,0.9)">${escapeHtml(initial)}</text>
+    </svg>`;
+  }
+
   function toast(message, type = '') {
     const node = document.createElement('div');
     node.className = `toast ${type}`;
-    node.textContent = message;
+    const icon = type === 'success' ? 'i-check' : type === 'error' ? 'i-warn' : '';
+    if (icon) node.innerHTML = iconSvg(icon);
+    const text = document.createElement('span');
+    text.textContent = message;
+    node.appendChild(text);
     $('#toasts').appendChild(node);
     setTimeout(() => node.remove(), 3200);
   }
@@ -70,10 +119,32 @@
     return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toISOString().slice(0, 10);
   }
 
+  function parseDateValue(value) {
+    if (!value) return 0;
+    const parsed = Date.parse(String(value).replace(' ', 'T'));
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+
   function formatSize(bytes) {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  }
+
+  // 弹窗内 Tab 循环，避免焦点跑到遮罩背后
+  function trapTab(event, modal) {
+    if (event.key !== 'Tab') return;
+    const focusables = modal.querySelectorAll('button, input, a[href]');
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   function showConfirm(title, text, okLabel = '确认删除') {
@@ -82,14 +153,29 @@
       $('#confirm-text').textContent = text;
       $('#confirm-ok').textContent = okLabel;
       const mask = $('#confirm-modal');
+      const opener = document.activeElement;
       mask.hidden = false;
 
       const done = (result) => {
         mask.hidden = true;
+        document.removeEventListener('keydown', onKeydown, true);
         $('#confirm-ok').onclick = null;
         $('#confirm-cancel').onclick = null;
+        if (opener && typeof opener.focus === 'function') opener.focus();
         resolve(result);
       };
+
+      const onKeydown = (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          done(false);
+        } else {
+          trapTab(event, mask);
+        }
+      };
+
+      document.addEventListener('keydown', onKeydown, true);
+      $('#confirm-cancel').focus();
 
       $('#confirm-ok').onclick = () => done(true);
       $('#confirm-cancel').onclick = () => done(false);
@@ -146,17 +232,35 @@
   }
 
   let routing = false;
+  let pendingRoute = false;
+  let currentHash = '';
+  let suppressNextRoute = false;
 
   async function route() {
-    if (routing) return;
+    if (routing) {
+      pendingRoute = true;
+      return;
+    }
     routing = true;
 
     try {
-      const hash = location.hash || '#/posts';
-      const [, page, param] = hash.match(/^#\/([a-z]+)(?:\/(.*))?$/) || [null, 'posts', ''];
+      const hash = location.hash || '#/overview';
+      const [, page, param] = hash.match(/^#\/([a-z]+)(?:\/(.*))?$/) || [null, 'overview', ''];
 
-      // 离开编辑器时清理
+      // 离开编辑器时：有未保存修改先确认（涵盖导航点击与浏览器前进/后退）
       if (views.editor.hidden === false && page !== 'edit' && page !== 'new') {
+        if (state.dirty) {
+          const confirmed = await leaveEditorGuard();
+          if (!confirmed) {
+            pendingRoute = false;
+            if (location.hash !== currentHash) {
+              suppressNextRoute = true;
+              location.hash = currentHash;
+            }
+            return;
+          }
+          clearDirty();
+        }
         destroyEditor();
       }
 
@@ -167,6 +271,10 @@
         views.editor.hidden = false;
         $('[data-nav="posts"]').classList.add('active');
         await openEditor(page === 'edit' ? decodeURIComponent(param || '') : null);
+      } else if (page === 'posts') {
+        views.posts.hidden = false;
+        $('[data-nav="posts"]').classList.add('active');
+        await refreshPosts();
       } else if (page === 'images') {
         views.images.hidden = false;
         $('[data-nav="images"]').classList.add('active');
@@ -176,22 +284,125 @@
         $('[data-nav="deploy"]').classList.add('active');
         await refreshStatus();
       } else {
-        views.posts.hidden = false;
-        $('[data-nav="posts"]').classList.add('active');
-        await refreshPosts();
+        views.overview.hidden = false;
+        $('[data-nav="overview"]').classList.add('active');
+        await refreshOverview();
       }
+
+      currentHash = hash;
     } finally {
       routing = false;
+      if (pendingRoute) {
+        pendingRoute = false;
+        route();
+      }
     }
   }
 
-  window.addEventListener('hashchange', route);
+  window.addEventListener('hashchange', () => {
+    if (suppressNextRoute) {
+      suppressNextRoute = false;
+      return;
+    }
+    route();
+  });
 
   window.addEventListener('beforeunload', (event) => {
     if (state.dirty) {
       event.preventDefault();
       event.returnValue = '';
     }
+  });
+
+  /* ═══════════ 概览 ═══════════ */
+
+  function renderGreeting() {
+    const now = new Date();
+    const hour = now.getHours();
+    const greeting =
+      hour < 5 ? '夜深了' : hour < 11 ? '早上好' : hour < 14 ? '中午好' : hour < 18 ? '下午好' : '晚上好';
+    $('#overview-greeting').textContent = `${greeting}，GoodNut`;
+    $('#overview-date').textContent = now.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long'
+    });
+  }
+
+  function renderRecentPosts() {
+    const list = $('#recent-posts');
+    if (!state.posts.length) {
+      list.innerHTML = `<div class="empty-tip">${iconSvg('i-doc')}还没有文章，点击右上角"新建文章"开始写作</div>`;
+      return;
+    }
+
+    list.innerHTML = state.posts
+      .slice(0, 5)
+      .map((post) => {
+        const sub = [(post.categories || [])[0], post.words ? `${post.words} 字` : '']
+          .filter(Boolean)
+          .join(' · ');
+        return `
+        <button class="recent-item" type="button" data-file="${escapeHtml(post.file)}">
+          <span class="recent-ic">${post.cover ? `<img src="${escapeHtml(post.cover)}" loading="lazy" alt="">` : generatedCover(post.title)}</span>
+          <span class="recent-main">
+            <span class="recent-title">${escapeHtml(post.title)}</span>
+            ${sub ? `<span class="recent-sub">${escapeHtml(sub)}</span>` : ''}
+          </span>
+          <span class="recent-date">${escapeHtml(formatDate(post.date))}</span>
+        </button>`;
+      })
+      .join('');
+  }
+
+  async function refreshOverview() {
+    renderGreeting();
+
+    const [postsResult, imagesResult, statusResult] = await Promise.allSettled([
+      api('/api/posts'),
+      api('/api/images'),
+      api('/api/status')
+    ]);
+
+    if (postsResult.status === 'fulfilled') {
+      state.posts = postsResult.value.posts;
+      $('#nav-post-count').textContent = state.posts.length || '';
+      $('#stat-posts').textContent = state.posts.length;
+      renderRecentPosts();
+    } else {
+      $('#recent-posts').innerHTML = `<div class="empty-tip">${iconSvg('i-warn')}加载失败：${escapeHtml(postsResult.reason?.message || '')}</div>`;
+    }
+
+    if (imagesResult.status === 'fulfilled') {
+      state.images = imagesResult.value.images;
+      $('#stat-images').textContent = state.images.length;
+    }
+
+    if (statusResult.status === 'fulfilled') {
+      const status = statusResult.value;
+      state.status = status;
+      const git = status.git || {};
+      $('#stat-repo').textContent = git.available ? (git.dirty ? '有未提交更改' : '工作区干净') : '非 Git 仓库';
+      $('#stat-repo-label').textContent = git.available && git.branch ? `分支 ${git.branch}` : '仓库状态';
+      $('#stat-preview').textContent = status.previewRunning ? '运行中' : '未启动';
+      $('#overview-token-warn').hidden = Boolean(status.githubTokenConfigured);
+      syncStatusUi(status);
+    }
+  }
+
+  $('#ov-new-post').addEventListener('click', () => navigate('#/new'));
+  $('#qa-new').addEventListener('click', () => navigate('#/new'));
+  $('#qa-upload').addEventListener('click', () => navigate('#/images'));
+  $('#qa-publish').addEventListener('click', () => {
+    navigate('#/deploy');
+    setTimeout(() => $('#btn-publish').focus(), 300);
+  });
+
+  $('#recent-posts').addEventListener('click', (event) => {
+    const item = event.target.closest('.recent-item');
+    if (!item) return;
+    navigate(`#/edit/${encodeURIComponent(item.dataset.file)}`);
   });
 
   /* ═══════════ 文章列表 ═══════════ */
@@ -203,13 +414,26 @@
       $('#nav-post-count').textContent = posts.length || '';
       renderPosts();
     } catch (error) {
+      $('#post-list').innerHTML = `<div class="empty-tip">${iconSvg('i-warn')}加载文章失败：${escapeHtml(error.message)}</div>`;
       toast(`加载文章失败：${error.message}`, 'error');
     }
   }
 
+  function sortPosts(posts) {
+    const mode = $('#post-sort').value;
+    const copy = [...posts];
+    if (mode === 'title') {
+      copy.sort((left, right) => String(left.title).localeCompare(String(right.title), 'zh'));
+    } else if (mode === 'date') {
+      copy.sort((left, right) => parseDateValue(right.date) - parseDateValue(left.date));
+    }
+    // 'recent' 保持服务端顺序（最近更新优先）
+    return copy;
+  }
+
   function renderPosts() {
     const keyword = $('#post-search').value.trim().toLowerCase();
-    const filtered = state.posts.filter((post) => {
+    const filtered = sortPosts(state.posts).filter((post) => {
       if (!keyword) return true;
       const haystack = [post.title, ...(post.tags || []), ...(post.categories || [])].join(' ').toLowerCase();
       return haystack.includes(keyword);
@@ -221,30 +445,40 @@
 
     const list = $('#post-list');
     if (filtered.length === 0) {
-      list.innerHTML = '<div class="empty-tip">没有找到文章。点击右上角"新建文章"开始写作 ✎</div>';
+      list.innerHTML = `<div class="empty-tip">${iconSvg('i-search')}没有找到文章。换个关键词，或点击右上角"新建文章"开始写作</div>`;
       return;
     }
 
     list.innerHTML = filtered
       .map((post) => {
         const categories = (post.categories || []).map((c) => `<span class="chip cat">${escapeHtml(c)}</span>`).join('');
-        const tags = (post.tags || []).slice(0, 4).map((t) => `<span class="chip">${escapeHtml(t)}</span>`).join('');
+        const tags = (post.tags || []).slice(0, 3).map((t) => `<span class="chip">${escapeHtml(t)}</span>`).join('');
+        const cover = post.cover
+          ? `<img src="${escapeHtml(post.cover)}" loading="lazy" alt="">`
+          : generatedCover(post.title);
+        const words = post.words ? `<span class="meta-plain">${post.words} 字</span>` : '';
         return `
-        <div class="post-card" data-file="${escapeHtml(post.file)}">
+        <article class="post-card" data-file="${escapeHtml(post.file)}">
+          <div class="post-cover">${cover}</div>
           <div class="post-card-main">
             <h2 class="post-title">${escapeHtml(post.title)}</h2>
-            <div class="post-meta"><span>${formatDate(post.date)}</span>${categories}${tags}</div>
+            ${post.excerpt ? `<p class="post-excerpt">${escapeHtml(post.excerpt)}</p>` : ''}
+            <div class="post-meta">
+              <span class="meta-plain">${iconSvg('i-calendar')}${escapeHtml(formatDate(post.date))}</span>
+              ${words}${categories}${tags}
+            </div>
           </div>
           <div class="post-actions">
-            <button class="icon-btn" data-op="edit" title="编辑">✎</button>
-            <button class="icon-btn del" data-op="delete" title="删除">✕</button>
+            <button class="icon-btn" data-op="edit" title="编辑">${iconSvg('i-pen')}</button>
+            <button class="icon-btn del" data-op="delete" title="删除">${iconSvg('i-trash')}</button>
           </div>
-        </div>`;
+        </article>`;
       })
       .join('');
   }
 
   $('#post-search').addEventListener('input', renderPosts);
+  $('#post-sort').addEventListener('change', renderPosts);
   $('#btn-new-post').addEventListener('click', () => navigate('#/new'));
 
   $('#post-list').addEventListener('click', async (event) => {
@@ -283,6 +517,23 @@
     $('#editor-dirty').hidden = true;
   }
 
+  let wordCountTimer = null;
+
+  function updateWordCount() {
+    const length = getEditorMarkdown().replace(/\s+/g, '').length;
+    $('#editor-words').textContent = length ? `${length} 字` : '';
+  }
+
+  function scheduleWordCount() {
+    clearTimeout(wordCountTimer);
+    wordCountTimer = setTimeout(updateWordCount, 400);
+  }
+
+  function onEditorChange() {
+    markDirty();
+    scheduleWordCount();
+  }
+
   function destroyEditor() {
     if (state.editor) {
       try {
@@ -311,7 +562,7 @@
       const fallback = $('#editor-fallback');
       fallback.hidden = false;
       fallback.value = initialValue;
-      fallback.oninput = markDirty;
+      fallback.oninput = onEditorChange;
       toast('未找到 Toast UI Editor 资源，已切换为纯 Markdown 模式', 'error');
       return;
     }
@@ -340,7 +591,7 @@
         }
       },
       events: {
-        change: markDirty
+        change: onEditorChange
       }
     });
 
@@ -393,6 +644,7 @@
     updateMetaBrief();
     createEditor(content);
     clearDirty();
+    updateWordCount();
 
     for (const input of Object.values(fields)) {
       input.oninput = () => {
@@ -476,12 +728,8 @@
     clearDirty();
   }
 
-  $('#btn-back').addEventListener('click', async () => {
-    if (await leaveEditorGuard()) {
-      clearDirty();
-      navigate('#/posts');
-    }
-  });
+  // 未保存时的确认由 route() 统一处理
+  $('#btn-back').addEventListener('click', () => navigate('#/posts'));
 
   $('#btn-save').addEventListener('click', async () => {
     try {
@@ -489,6 +737,16 @@
       toast('已保存', 'success');
     } catch (error) {
       toast(`保存失败：${error.message}`, 'error');
+    }
+  });
+
+  // Ctrl+S / Cmd+S 保存
+  document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+      if (!views.editor.hidden) {
+        event.preventDefault();
+        $('#btn-save').click();
+      }
     }
   });
 
@@ -502,7 +760,7 @@
         body: { commitMessage: `发布：${title}` }
       });
       navigate('#/deploy');
-      watchTask(taskId, '发布');
+      watchTask(taskId, '发布', 'publish');
     } catch (error) {
       toast(`操作失败：${error.message}`, 'error');
     }
@@ -574,6 +832,7 @@
       state.images = images;
       renderImages();
     } catch (error) {
+      $('#image-grid').innerHTML = `<div class="empty-tip">${iconSvg('i-warn')}加载图片失败：${escapeHtml(error.message)}</div>`;
       toast(`加载图片失败：${error.message}`, 'error');
     }
   }
@@ -581,7 +840,7 @@
   function renderImages() {
     const grid = $('#image-grid');
     if (!state.images.length) {
-      grid.innerHTML = '<div class="empty-tip">图床还是空的，上传第一张图片吧 ▣</div>';
+      grid.innerHTML = `<div class="empty-tip">${iconSvg('i-image')}图床还是空的，拖拽或粘贴上传第一张图片吧</div>`;
       return;
     }
 
@@ -590,16 +849,16 @@
         const shortName = image.file.split('/').pop();
         return `
         <div class="image-card" data-index="${index}">
-          <img class="image-thumb" src="${escapeHtml(image.url)}" loading="lazy" alt="${escapeHtml(shortName)}" title="点击复制链接">
+          <div class="image-thumb-wrap" title="点击复制链接">
+            <img class="image-thumb" src="${escapeHtml(image.url)}" loading="lazy" alt="${escapeHtml(shortName)}">
+            <div class="image-overlay">
+              <button class="overlay-btn" data-op="copy" title="复制链接">${iconSvg('i-copy')}</button>
+              ${image.deletable ? `<button class="overlay-btn del" data-op="delete" title="删除">${iconSvg('i-trash')}</button>` : ''}
+            </div>
+          </div>
           <div class="image-info">
             <div class="image-name" title="${escapeHtml(image.file)}">${escapeHtml(shortName)}</div>
-            <div class="image-sub">
-              <span>${formatSize(image.size)}</span>
-              <span class="image-ops">
-                <button class="icon-btn" data-op="copy" title="复制链接">⧉</button>
-                ${image.deletable ? '<button class="icon-btn del" data-op="delete" title="删除">✕</button>' : ''}
-              </span>
-            </div>
+            <div class="image-sub">${formatSize(image.size)}</div>
           </div>
         </div>`;
       })
@@ -620,25 +879,42 @@
         <label>${escapeHtml(row.label)}</label>
         <div class="copy-row-line">
           <input readonly value="${escapeHtml(row.value)}" data-copy-index="${index}">
-          <button class="btn small" data-copy-value="${escapeHtml(row.value)}" type="button">复制</button>
+          <button class="btn small" data-copy-value="${escapeHtml(row.value)}" type="button">${iconSvg('i-copy')}复制</button>
         </div>
       </div>`
       )
       .join('');
 
     const mask = $('#copy-modal');
+    copyModalOpener = document.activeElement;
     mask.hidden = false;
+    $('#copy-modal-close').focus();
 
     $('#copy-rows').querySelectorAll('[data-copy-value]').forEach((button) => {
       button.onclick = () => copyText(button.dataset.copyValue);
     });
   }
 
-  $('#copy-modal-close').addEventListener('click', () => {
+  let copyModalOpener = null;
+
+  function closeCopyModal() {
     $('#copy-modal').hidden = true;
-  });
+    if (copyModalOpener && typeof copyModalOpener.focus === 'function') copyModalOpener.focus();
+    copyModalOpener = null;
+  }
+
+  $('#copy-modal-close').addEventListener('click', closeCopyModal);
   $('#copy-modal').addEventListener('click', (event) => {
-    if (event.target === $('#copy-modal')) $('#copy-modal').hidden = true;
+    if (event.target === $('#copy-modal')) closeCopyModal();
+  });
+  document.addEventListener('keydown', (event) => {
+    if ($('#copy-modal').hidden) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeCopyModal();
+    } else {
+      trapTab(event, $('#copy-modal'));
+    }
   });
 
   $('#btn-upload-image').addEventListener('click', () => pickFiles(uploadFiles));
@@ -693,6 +969,22 @@
 
   /* ═══════════ 发布中心 ═══════════ */
 
+  function syncStatusUi(status) {
+    const running = Boolean(status.previewRunning);
+    const sideLink = $('#link-preview');
+    sideLink.hidden = !running;
+    sideLink.href = status.previewUrl || '#';
+
+    if (status.siteUrl) {
+      const label = status.siteUrl.replace(/^https?:\/\//, '');
+      const siteLink = $('#link-site');
+      siteLink.href = status.siteUrl;
+      siteLink.querySelector('.side-link-text').textContent = label;
+      const quickSite = $('#qa-site');
+      if (quickSite) quickSite.href = status.siteUrl;
+    }
+  }
+
   async function refreshStatus() {
     try {
       state.status = await api('/api/status');
@@ -724,15 +1016,7 @@
     openLink.hidden = !running;
     openLink.href = status.previewUrl || '#';
 
-    const sideLink = $('#link-preview');
-    sideLink.hidden = !running;
-    sideLink.href = status.previewUrl || '#';
-
-    if (status.siteUrl) {
-      const siteLink = $('#link-site');
-      siteLink.href = status.siteUrl;
-      siteLink.lastChild.textContent = status.siteUrl.replace(/^https?:\/\//, '');
-    }
+    syncStatusUi(status);
   }
 
   function setTaskBadge(statusText) {
@@ -747,10 +1031,46 @@
     $('#nav-deploy-dot').hidden = statusText !== 'running';
   }
 
-  function watchTask(taskId, label) {
+  // 已到达的最大阶段跨轮询保留：日志超长被截断丢掉早期标记时进度条不回退
+  let publishPhase = 0;
+
+  function updatePublishSteps(log, statusText) {
+    // 只认行首的服务端标记（如 "[phase] 2/4 构建站点"），避免提交信息里的同款文本干扰
+    const phasePattern = /^\[phase\] (\d)\/4/gm;
+    let match;
+    while ((match = phasePattern.exec(log))) {
+      publishPhase = Math.max(publishPhase, Number(match[1]));
+    }
+
+    let current = publishPhase;
+    // 还没打出任何阶段标记就失败了，至少把第一步标红
+    if (statusText === 'error') current = Math.max(current, 1);
+
+    document.querySelectorAll('#publish-steps .pstep').forEach((step) => {
+      const number = Number(step.dataset.step);
+      step.classList.remove('done', 'doing', 'fail');
+      if (statusText === 'success') {
+        step.classList.add('done');
+      } else if (number < current) {
+        step.classList.add('done');
+      } else if (number === current) {
+        step.classList.add(statusText === 'error' ? 'fail' : 'doing');
+      }
+    });
+  }
+
+  function watchTask(taskId, label, kind = '') {
     if (state.taskTimer) clearInterval(state.taskTimer);
     state.watchingTaskId = taskId;
     setTaskBadge('running');
+
+    const steps = $('#publish-steps');
+    steps.hidden = kind !== 'publish';
+    if (kind === 'publish') {
+      publishPhase = 0;
+      updatePublishSteps('', 'running');
+    }
+
     const consoleNode = $('#task-console');
     consoleNode.textContent = `[${label}] 任务 #${taskId} 已启动…\n`;
 
@@ -759,6 +1079,7 @@
         const { task } = await api(`/api/tasks/${taskId}`);
         consoleNode.textContent = task.log || '（暂无输出）';
         consoleNode.scrollTop = consoleNode.scrollHeight;
+        if (kind === 'publish') updatePublishSteps(task.log || '', task.status);
 
         if (task.status !== 'running') {
           clearInterval(state.taskTimer);
@@ -783,7 +1104,7 @@
         method: 'POST',
         body: message ? { commitMessage: message } : {}
       });
-      watchTask(taskId, '发布');
+      watchTask(taskId, '发布', 'publish');
     } catch (error) {
       toast(`发布失败：${error.message}`, 'error');
     }
@@ -792,7 +1113,7 @@
   $('#btn-build').addEventListener('click', async () => {
     try {
       const { taskId } = await api('/api/actions/build', { method: 'POST' });
-      watchTask(taskId, '构建');
+      watchTask(taskId, '构建', 'build');
     } catch (error) {
       toast(`构建失败：${error.message}`, 'error');
     }

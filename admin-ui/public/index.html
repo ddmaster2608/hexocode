@@ -4,12 +4,47 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Goodnut · 博客管理台</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('admin-theme') || 'light';</script>
 <link rel="stylesheet" href="/vendor/toastui-editor.css">
 <link rel="stylesheet" href="/vendor/toastui-editor-dark.css">
 <link rel="stylesheet" href="/styles.css">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Cg%20fill='%23D97757'%3E%3Cpath%20d='M16%202l2.2%209.2L27.4%206 20.8%13.8%2030%2016l-9.2%202.2L26%2027.4%2018.2%2020.8%2016%2030l-2.2-9.2L6%2026l6.6-7.8L2%2016l9.2-2.2L6%204.6l7.8%206.6z'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Cg%20fill='%23D97757'%3E%3Cpath%20d='M16%202l2.2%209.2L27.4%206%2020.8%13.8%2030%2016l-9.2%202.2L26%2027.4%2018.2%2020.8%2016%2030l-2.2-9.2L6%2026l6.6-7.8L2%2016l9.2-2.2L6%204.6l7.8%206.6z'/%3E%3C/g%3E%3C/svg%3E">
 </head>
 <body>
+
+<!-- ══════════ SVG 图标库（Feather 风格） ══════════ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <defs>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <symbol id="i-hammer" viewBox="0 0 24 24"><path d="M14 4l6 6-9 9H5v-6l9-9z"/><path d="M14 4l3-1 4 4-1 3"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+  </defs>
+</svg>
+
 <div id="app">
   <!-- ══════════ 侧边栏 ══════════ -->
   <aside class="sidebar">
@@ -24,34 +59,120 @@
     </div>
 
     <nav class="nav">
+      <a href="#/overview" class="nav-item" data-nav="overview">
+        <svg class="i nav-icon"><use href="#i-grid"/></svg><span class="nav-text">概览</span>
+      </a>
       <a href="#/posts" class="nav-item" data-nav="posts">
-        <span class="nav-icon">✎</span><span>文章</span>
+        <svg class="i nav-icon"><use href="#i-pen"/></svg><span class="nav-text">文章</span>
         <span class="nav-count" id="nav-post-count"></span>
       </a>
       <a href="#/images" class="nav-item" data-nav="images">
-        <span class="nav-icon">▣</span><span>图床</span>
+        <svg class="i nav-icon"><use href="#i-image"/></svg><span class="nav-text">图床</span>
       </a>
       <a href="#/deploy" class="nav-item" data-nav="deploy">
-        <span class="nav-icon">↗</span><span>发布</span>
+        <svg class="i nav-icon"><use href="#i-send"/></svg><span class="nav-text">发布</span>
         <span class="nav-dot" id="nav-deploy-dot" hidden></span>
       </a>
     </nav>
 
     <div class="sidebar-footer">
       <a class="side-link" id="link-site" href="https://ddmaster2608.github.io" target="_blank" rel="noopener">
-        <span class="status-dot ok"></span>ddmaster2608.github.io
+        <span class="status-dot ok"></span><span class="side-link-text">ddmaster2608.github.io</span>
       </a>
       <a class="side-link" id="link-preview" href="#" target="_blank" rel="noopener" hidden>
-        <span class="status-dot warn"></span>本地预览运行中
+        <span class="status-dot warn"></span><span class="side-link-text">本地预览运行中</span>
       </a>
       <button class="theme-toggle" id="theme-toggle" type="button" title="切换深浅色">
-        <span class="theme-icon">◐</span><span id="theme-label">深色模式</span>
+        <svg class="i theme-icon-sun"><use href="#i-sun"/></svg>
+        <svg class="i theme-icon-moon"><use href="#i-moon"/></svg>
+        <span id="theme-label">深色模式</span>
       </button>
     </div>
   </aside>
 
   <!-- ══════════ 主区域 ══════════ -->
   <main class="main">
+
+    <!-- 概览 -->
+    <section class="view" id="view-overview" hidden>
+      <header class="view-head">
+        <div>
+          <h1 id="overview-greeting">你好，GoodNut</h1>
+          <p class="view-sub" id="overview-date"></p>
+        </div>
+        <div class="head-actions">
+          <button class="btn primary" id="ov-new-post" type="button"><svg class="i"><use href="#i-plus"/></svg>新建文章</button>
+        </div>
+      </header>
+
+      <div class="banner warn" id="overview-token-warn" hidden>
+        <svg class="i"><use href="#i-warn"/></svg>
+        <span>还未配置 GitHub Token，发布时无法推送。请在 <code>admin-ui/admin.env</code> 中填写 <code>GITHUB_TOKEN</code> 后重启管理台。</span>
+      </div>
+
+      <div class="stat-grid" id="stat-grid">
+        <a class="stat-tile" href="#/posts">
+          <div class="stat-icon tone-accent"><svg class="i"><use href="#i-pen"/></svg></div>
+          <div class="stat-body">
+            <div class="stat-num" id="stat-posts">–</div>
+            <div class="stat-label">篇文章</div>
+          </div>
+        </a>
+        <a class="stat-tile" href="#/images">
+          <div class="stat-icon tone-blue"><svg class="i"><use href="#i-image"/></svg></div>
+          <div class="stat-body">
+            <div class="stat-num" id="stat-images">–</div>
+            <div class="stat-label">张图片</div>
+          </div>
+        </a>
+        <a class="stat-tile" href="#/deploy">
+          <div class="stat-icon tone-green"><svg class="i"><use href="#i-branch"/></svg></div>
+          <div class="stat-body">
+            <div class="stat-num stat-text" id="stat-repo">–</div>
+            <div class="stat-label" id="stat-repo-label">仓库状态</div>
+          </div>
+        </a>
+        <a class="stat-tile" href="#/deploy">
+          <div class="stat-icon tone-purple"><svg class="i"><use href="#i-eye"/></svg></div>
+          <div class="stat-body">
+            <div class="stat-num stat-text" id="stat-preview">–</div>
+            <div class="stat-label">本地预览</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="overview-cols">
+        <div class="card recent-card">
+          <div class="card-title-row">
+            <h3>最近文章</h3>
+            <a class="link-more" href="#/posts">查看全部 →</a>
+          </div>
+          <div class="recent-list" id="recent-posts"><div class="skeleton-rows"><i></i><i></i><i></i><i></i></div></div>
+        </div>
+
+        <div class="card quick-card">
+          <div class="card-title-row"><h3>快捷操作</h3></div>
+          <div class="quick-list">
+            <button class="quick-item" id="qa-new" type="button">
+              <span class="quick-ic tone-accent"><svg class="i"><use href="#i-plus"/></svg></span>
+              <span class="quick-main"><b>写新文章</b><small>打开编辑器开始创作</small></span>
+            </button>
+            <button class="quick-item" id="qa-upload" type="button">
+              <span class="quick-ic tone-blue"><svg class="i"><use href="#i-upload"/></svg></span>
+              <span class="quick-main"><b>上传图片</b><small>拖拽或粘贴到图床</small></span>
+            </button>
+            <button class="quick-item" id="qa-publish" type="button">
+              <span class="quick-ic tone-green"><svg class="i"><use href="#i-zap"/></svg></span>
+              <span class="quick-main"><b>一键发布</b><small>构建并推送到 GitHub Pages</small></span>
+            </button>
+            <a class="quick-item" id="qa-site" href="https://ddmaster2608.github.io" target="_blank" rel="noopener">
+              <span class="quick-ic tone-purple"><svg class="i"><use href="#i-external"/></svg></span>
+              <span class="quick-main"><b>打开博客</b><small>查看线上站点效果</small></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- 文章列表 -->
     <section class="view" id="view-posts" hidden>
@@ -61,22 +182,32 @@
           <p class="view-sub" id="posts-sub">加载中…</p>
         </div>
         <div class="head-actions">
-          <input class="search" id="post-search" type="search" placeholder="搜索标题、标签、分类…">
-          <button class="btn primary" id="btn-new-post" type="button">＋ 新建文章</button>
+          <div class="search-wrap">
+            <svg class="i search-ic"><use href="#i-search"/></svg>
+            <input class="search" id="post-search" type="search" placeholder="搜索标题、标签、分类…">
+          </div>
+          <select class="select" id="post-sort" title="排序方式">
+            <option value="recent">最近更新</option>
+            <option value="date">发布日期</option>
+            <option value="title">标题</option>
+          </select>
+          <button class="btn primary" id="btn-new-post" type="button"><svg class="i"><use href="#i-plus"/></svg>新建文章</button>
         </div>
       </header>
-      <div class="post-list" id="post-list"></div>
+      <div class="post-list" id="post-list"><div class="skeleton-cards"><i></i><i></i><i></i><i></i></div></div>
     </section>
 
     <!-- 编辑器 -->
     <section class="view view-editor" id="view-editor" hidden>
       <header class="editor-bar">
-        <button class="btn ghost" id="btn-back" type="button">← 返回</button>
+        <button class="btn ghost" id="btn-back" type="button"><svg class="i"><use href="#i-back"/></svg>返回</button>
         <span class="editor-file" id="editor-file"></span>
         <span class="editor-dirty" id="editor-dirty" hidden>未保存</span>
         <div class="spacer"></div>
-        <button class="btn" id="btn-save" type="button">保存</button>
-        <button class="btn primary" id="btn-save-publish" type="button">保存并发布 ↗</button>
+        <span class="editor-words" id="editor-words" title="正文字数"></span>
+        <span class="kbd-hint" title="保存快捷键">Ctrl+S</span>
+        <button class="btn" id="btn-save" type="button"><svg class="i"><use href="#i-save"/></svg>保存</button>
+        <button class="btn primary" id="btn-save-publish" type="button"><svg class="i"><use href="#i-send"/></svg>保存并发布</button>
       </header>
 
       <div class="editor-scroll">
@@ -93,7 +224,7 @@
             <label class="meta-cover">封面图
               <div class="cover-row">
                 <input id="f-cover" type="text" placeholder="粘贴图片链接，或点右侧上传">
-                <button class="btn small" id="btn-cover-upload" type="button">上传</button>
+                <button class="btn small" id="btn-cover-upload" type="button"><svg class="i"><use href="#i-upload"/></svg>上传</button>
               </div>
               <img id="cover-preview" class="cover-preview" alt="" hidden>
             </label>
@@ -113,11 +244,14 @@
           <p class="view-sub">图片保存在仓库 <code>source/images/</code>，发布后即可通过站点链接访问</p>
         </div>
         <div class="head-actions">
-          <button class="btn primary" id="btn-upload-image" type="button">＋ 上传图片</button>
+          <button class="btn primary" id="btn-upload-image" type="button"><svg class="i"><use href="#i-upload"/></svg>上传图片</button>
         </div>
       </header>
-      <div class="dropzone" id="dropzone">拖拽图片到这里，或点击上方"上传图片"（支持粘贴 Ctrl+V）</div>
-      <div class="image-grid" id="image-grid"></div>
+      <div class="dropzone" id="dropzone">
+        <svg class="i dz-ic"><use href="#i-upload"/></svg>
+        <span>拖拽图片到这里，或点击上传 · 支持 Ctrl+V 粘贴</span>
+      </div>
+      <div class="image-grid" id="image-grid"><div class="skeleton-cards"><i></i><i></i><i></i><i></i></div></div>
     </section>
 
     <!-- 发布中心 -->
@@ -130,36 +264,54 @@
       </header>
 
       <div class="deploy-grid">
-        <div class="card">
-          <h3>一键发布</h3>
-          <p class="card-desc">提交所有更改，构建站点，推送到 GitHub Pages 仓库和源码仓库。</p>
-          <input class="input" id="commit-message" type="text" placeholder="提交信息（可留空）">
-          <div class="card-actions">
-            <button class="btn primary" id="btn-publish" type="button">🚀 发布到 GitHub Pages</button>
-            <button class="btn" id="btn-build" type="button">仅构建</button>
+        <div class="card deploy-hero">
+          <div class="card-title-row">
+            <h3><svg class="i card-ic"><use href="#i-zap"/></svg>一键发布</h3>
           </div>
-          <p class="token-warn" id="token-warn" hidden>⚠ 未配置 GITHUB_TOKEN，推送可能失败。请在 <code>admin-ui/admin.env</code> 中填写。</p>
+          <p class="card-desc">提交所有更改 → 构建站点 → 推送到 GitHub Pages 仓库和源码仓库。</p>
+          <input class="input" id="commit-message" type="text" placeholder="提交信息（可留空，自动生成）">
+          <div class="card-actions">
+            <button class="btn primary" id="btn-publish" type="button"><svg class="i"><use href="#i-send"/></svg>发布到 GitHub Pages</button>
+            <button class="btn" id="btn-build" type="button"><svg class="i"><use href="#i-hammer"/></svg>仅构建</button>
+          </div>
+          <p class="token-warn" id="token-warn" hidden><svg class="i"><use href="#i-warn"/></svg> 未配置 GITHUB_TOKEN，推送可能失败。请在 <code>admin-ui/admin.env</code> 中填写。</p>
         </div>
 
-        <div class="card">
-          <h3>本地预览</h3>
-          <p class="card-desc">启动 Hexo 本地服务，实时预览整站效果。</p>
-          <div class="card-actions">
-            <button class="btn" id="btn-preview-start" type="button">▶ 启动预览</button>
-            <button class="btn" id="btn-preview-stop" type="button" hidden>■ 停止预览</button>
-            <a class="btn ghost" id="btn-preview-open" href="#" target="_blank" rel="noopener" hidden>打开预览 ↗</a>
+        <div class="deploy-side">
+          <div class="card">
+            <div class="card-title-row">
+              <h3><svg class="i card-ic"><use href="#i-eye"/></svg>本地预览</h3>
+            </div>
+            <p class="card-desc">启动 Hexo 本地服务，实时预览整站效果。</p>
+            <div class="card-actions">
+              <button class="btn" id="btn-preview-start" type="button"><svg class="i"><use href="#i-play"/></svg>启动预览</button>
+              <button class="btn" id="btn-preview-stop" type="button" hidden><svg class="i"><use href="#i-stop"/></svg>停止预览</button>
+              <a class="btn ghost" id="btn-preview-open" href="#" target="_blank" rel="noopener" hidden>打开预览 <svg class="i"><use href="#i-external"/></svg></a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title-row">
+              <h3><svg class="i card-ic"><use href="#i-branch"/></svg>仓库状态</h3>
+            </div>
+            <div class="repo-status" id="repo-status">加载中…</div>
           </div>
         </div>
+      </div>
 
-        <div class="card">
-          <h3>仓库状态</h3>
-          <div class="repo-status" id="repo-status">加载中…</div>
-        </div>
+      <div class="publish-steps" id="publish-steps" hidden>
+        <div class="pstep" data-step="1"><span class="pstep-dot"></span><span class="pstep-label">提交源码</span></div>
+        <div class="pstep-line"></div>
+        <div class="pstep" data-step="2"><span class="pstep-dot"></span><span class="pstep-label">构建站点</span></div>
+        <div class="pstep-line"></div>
+        <div class="pstep" data-step="3"><span class="pstep-dot"></span><span class="pstep-label">推送 Pages</span></div>
+        <div class="pstep-line"></div>
+        <div class="pstep" data-step="4"><span class="pstep-dot"></span><span class="pstep-label">推送源码</span></div>
       </div>
 
       <div class="console-wrap">
         <div class="console-head">
-          <span>任务日志</span>
+          <span><svg class="i console-ic"><use href="#i-terminal"/></svg>任务日志</span>
           <span class="task-badge" id="task-badge" hidden></span>
         </div>
         <pre class="console" id="task-console">尚无任务。点击"发布"或"仅构建"开始。</pre>
@@ -170,8 +322,8 @@
 
 <!-- 复制链接弹窗 -->
 <div class="modal-mask" id="copy-modal" hidden>
-  <div class="modal">
-    <h3>复制图片链接</h3>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="copy-modal-title" tabindex="-1">
+    <h3 id="copy-modal-title">复制图片链接</h3>
     <div class="copy-rows" id="copy-rows"></div>
     <div class="modal-actions">
       <button class="btn" id="copy-modal-close" type="button">关闭</button>
@@ -181,7 +333,7 @@
 
 <!-- 确认弹窗 -->
 <div class="modal-mask" id="confirm-modal" hidden>
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title" tabindex="-1">
     <h3 id="confirm-title">确认操作</h3>
     <p class="card-desc" id="confirm-text"></p>
     <div class="modal-actions">

@@ -486,6 +486,20 @@ async function readPost(fileName) {
   };
 }
 
+function buildExcerpt(content, maxLength = 110) {
+  const text = String(content || '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/[*_>#|~=-]{2,}/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
+}
+
 async function listPosts() {
   const entries = await fsp.readdir(postsDir, { withFileTypes: true });
   const files = entries
@@ -505,6 +519,9 @@ async function listPosts() {
         updated: post.updated,
         tags: post.tags,
         categories: post.categories,
+        cover: typeof post.extraMeta?.cover === 'string' ? post.extraMeta.cover : '',
+        words: post.content.replace(/\s+/g, '').length,
+        excerpt: buildExcerpt(post.content),
         modifiedAt: stats.mtime.toISOString()
       };
     })
@@ -1349,6 +1366,7 @@ async function handleApi(request, response, url) {
         );
       }
 
+      appendTaskLog(runningTask, '\n[phase] 1/4 提交源码\n');
       await runCommand(runningTask, 'Stage repository changes', 'git', ['add', '-A']);
 
       const status = await runCommandCapture('git', ['status', '--short']);
@@ -1366,8 +1384,10 @@ async function handleApi(request, response, url) {
         appendTaskLog(runningTask, '\n[info] No local changes to commit.\n');
       }
 
+      appendTaskLog(runningTask, '\n[phase] 2/4 构建站点\n');
       await runCommand(runningTask, 'Build Hexo site', npmCommand, ['run', 'build']);
 
+      appendTaskLog(runningTask, '\n[phase] 3/4 推送 GitHub Pages\n');
       if (pagesDeployEnabled) {
         await deployPublicDirectory(runningTask);
         appendTaskLog(runningTask, '\n[info] GitHub Pages repository update completed.\n');
@@ -1380,6 +1400,7 @@ async function handleApi(request, response, url) {
         throw new Error('Cannot determine which Git branch should be pushed.');
       }
 
+      appendTaskLog(runningTask, '\n[phase] 4/4 推送源码仓库\n');
       const sourcePushTarget = await getSourcePushTarget(gitStatus);
       try {
         await runCommandWithRetries(
