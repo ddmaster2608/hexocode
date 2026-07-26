@@ -486,6 +486,53 @@ async function readPost(fileName) {
   };
 }
 
+/* ═══ 自动封面（与 scripts/generated-cover.js 同一套规则） ═══ */
+
+function hashTitle(value) {
+  let hash = 5381;
+  const text = String(value);
+  for (let i = 0; i < text.length; i += 1) {
+    hash = ((hash << 5) + hash + text.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function extractContentImages(content) {
+  const urls = [];
+  const push = (raw) => {
+    const url = String(raw || '').trim();
+    if (!/^(https?:\/\/|\/)/i.test(url)) return;
+    if (/^data:/i.test(url)) return;
+    if (/\.svg([?#]|$)/i.test(url)) return;
+    if (!urls.includes(url)) urls.push(url);
+  };
+
+  const text = String(content || '');
+  let match;
+  const mdImage = /!\[[^\]]*\]\(\s*([^)\s]+)(?:\s+"[^"]*")?\s*\)/g;
+  while ((match = mdImage.exec(text))) push(match[1]);
+  const htmlImage = /<img[^>]+src=["']([^"']+)["']/gi;
+  while ((match = htmlImage.exec(text))) push(match[1]);
+  return urls;
+}
+
+async function listCoverPool() {
+  try {
+    const entries = await fsp.readdir(path.join(imagesDir, 'cover-pool'));
+    return entries.filter((name) => /\.(jpe?g|png|webp)$/i.test(name)).sort();
+  } catch {
+    return [];
+  }
+}
+
+function pickAutoCover(title, content, pool) {
+  const hash = hashTitle(title);
+  const contentImages = extractContentImages(content);
+  if (contentImages.length) return contentImages[hash % contentImages.length];
+  if (pool.length) return `/images/cover-pool/${pool[hash % pool.length]}`;
+  return '';
+}
+
 function buildExcerpt(content, maxLength = 110) {
   const text = String(content || '')
     .replace(/```[\s\S]*?```/g, ' ')
@@ -506,10 +553,13 @@ async function listPosts() {
     .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.md'))
     .map((entry) => entry.name);
 
+  const pool = await listCoverPool();
+
   const posts = await Promise.all(
     files.map(async (fileName) => {
       const post = await readPost(fileName);
       const stats = await fsp.stat(path.join(postsDir, fileName));
+      const cover = typeof post.extraMeta?.cover === 'string' ? post.extraMeta.cover : '';
 
       return {
         file: post.file,
@@ -519,7 +569,8 @@ async function listPosts() {
         updated: post.updated,
         tags: post.tags,
         categories: post.categories,
-        cover: typeof post.extraMeta?.cover === 'string' ? post.extraMeta.cover : '',
+        cover,
+        coverAuto: cover ? '' : pickAutoCover(post.title, post.content, pool),
         words: post.content.replace(/\s+/g, '').length,
         excerpt: buildExcerpt(post.content),
         modifiedAt: stats.mtime.toISOString()
@@ -1154,6 +1205,10 @@ async function listImages() {
     for (const entry of entries) {
       const entryPath = path.join(currentDir, entry.name);
       if (entry.isDirectory()) {
+        // 封面图片池与生成封面是系统素材，不进图床管理
+        if (currentDir === imagesDir && (entry.name === 'cover-pool' || entry.name === 'gen-covers')) {
+          continue;
+        }
         await walk(entryPath);
         continue;
       }

@@ -335,7 +335,7 @@
           .join(' · ');
         return `
         <button class="recent-item" type="button" data-file="${escapeHtml(post.file)}">
-          <span class="recent-ic">${post.cover ? `<img src="${escapeHtml(post.cover)}" loading="lazy" alt="">` : generatedCover(post.title)}</span>
+          <span class="recent-ic">${(post.cover || post.coverAuto) ? `<img src="${escapeHtml(post.cover || post.coverAuto)}" loading="lazy" alt="">` : generatedCover(post.title)}</span>
           <span class="recent-main">
             <span class="recent-title">${escapeHtml(post.title)}</span>
             ${sub ? `<span class="recent-sub">${escapeHtml(sub)}</span>` : ''}
@@ -443,8 +443,9 @@
       .map((post) => {
         const categories = (post.categories || []).map((c) => `<span class="chip cat">${escapeHtml(c)}</span>`).join('');
         const tags = (post.tags || []).slice(0, 3).map((t) => `<span class="chip">${escapeHtml(t)}</span>`).join('');
-        const cover = post.cover
-          ? `<img src="${escapeHtml(post.cover)}" loading="lazy" alt="">`
+        const coverUrl = post.cover || post.coverAuto;
+        const cover = coverUrl
+          ? `<img src="${escapeHtml(coverUrl)}" loading="lazy" alt="">`
           : generatedCover(post.title);
         const words = post.words ? `<span class="meta-plain">${post.words} 字</span>` : '';
         return `
