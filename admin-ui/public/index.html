@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goodnut · 博客管理台</title>
+<link rel="stylesheet" href="/vendor/toastui-editor.css">
+<link rel="stylesheet" href="/vendor/toastui-editor-dark.css">
+<link rel="stylesheet" href="/styles.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Cg%20fill='%23D97757'%3E%3Cpath%20d='M16%202l2.2%209.2L27.4%206 20.8%13.8%2030%2016l-9.2%202.2L26%2027.4%2018.2%2020.8%2016%2030l-2.2-9.2L6%2026l6.6-7.8L2%2016l9.2-2.2L6%204.6l7.8%206.6z'/%3E%3C/g%3E%3C/svg%3E">
+</head>
+<body>
+<div id="app">
+  <!-- ══════════ 侧边栏 ══════════ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <path fill="currentColor" d="M16 2l2.2 9.2L27.4 6l-6.6 7.8L30 16l-9.2 2.2L26 27.4l-7.8-6.6L16 30l-2.2-9.2L6 26l6.6-7.8L2 16l9.2-2.2L6 4.6l7.8 6.6z"/>
+      </svg>
+      <div class="brand-text">
+        <div class="brand-title">Goodnut</div>
+        <div class="brand-sub">博客管理台</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="#/posts" class="nav-item" data-nav="posts">
+        <span class="nav-icon">✎</span><span>文章</span>
+        <span class="nav-count" id="nav-post-count"></span>
+      </a>
+      <a href="#/images" class="nav-item" data-nav="images">
+        <span class="nav-icon">▣</span><span>图床</span>
+      </a>
+      <a href="#/deploy" class="nav-item" data-nav="deploy">
+        <span class="nav-icon">↗</span><span>发布</span>
+        <span class="nav-dot" id="nav-deploy-dot" hidden></span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="side-link" id="link-site" href="https://ddmaster2608.github.io" target="_blank" rel="noopener">
+        <span class="status-dot ok"></span>ddmaster2608.github.io
+      </a>
+      <a class="side-link" id="link-preview" href="#" target="_blank" rel="noopener" hidden>
+        <span class="status-dot warn"></span>本地预览运行中
+      </a>
+      <button class="theme-toggle" id="theme-toggle" type="button" title="切换深浅色">
+        <span class="theme-icon">◐</span><span id="theme-label">深色模式</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══════════ 主区域 ══════════ -->
+  <main class="main">
+
+    <!-- 文章列表 -->
+    <section class="view" id="view-posts" hidden>
+      <header class="view-head">
+        <div>
+          <h1>文章</h1>
+          <p class="view-sub" id="posts-sub">加载中…</p>
+        </div>
+        <div class="head-actions">
+          <input class="search" id="post-search" type="search" placeholder="搜索标题、标签、分类…">
+          <button class="btn primary" id="btn-new-post" type="button">＋ 新建文章</button>
+        </div>
+      </header>
+      <div class="post-list" id="post-list"></div>
+    </section>
+
+    <!-- 编辑器 -->
+    <section class="view view-editor" id="view-editor" hidden>
+      <header class="editor-bar">
+        <button class="btn ghost" id="btn-back" type="button">← 返回</button>
+        <span class="editor-file" id="editor-file"></span>
+        <span class="editor-dirty" id="editor-dirty" hidden>未保存</span>
+        <div class="spacer"></div>
+        <button class="btn" id="btn-save" type="button">保存</button>
+        <button class="btn primary" id="btn-save-publish" type="button">保存并发布 ↗</button>
+      </header>
+
+      <div class="editor-scroll">
+        <input class="title-input" id="f-title" type="text" placeholder="文章标题" autocomplete="off">
+
+        <details class="meta-panel" id="meta-panel">
+          <summary>文章设置 <span class="meta-brief" id="meta-brief"></span></summary>
+          <div class="meta-grid">
+            <label>标签 <input id="f-tags" type="text" placeholder="用逗号分隔，如：算法, C++"></label>
+            <label>分类 <input id="f-categories" type="text" placeholder="用逗号分隔"></label>
+            <label>文件名 <input id="f-slug" type="text" placeholder="留空则使用标题"></label>
+            <label>短链接 abbrlink <input id="f-abbrlink" type="text" placeholder="可留空"></label>
+            <label>发布日期 <input id="f-date" type="text" placeholder="留空自动生成"></label>
+            <label class="meta-cover">封面图
+              <div class="cover-row">
+                <input id="f-cover" type="text" placeholder="粘贴图片链接，或点右侧上传">
+                <button class="btn small" id="btn-cover-upload" type="button">上传</button>
+              </div>
+              <img id="cover-preview" class="cover-preview" alt="" hidden>
+            </label>
+          </div>
+        </details>
+
+        <div id="editor-host"></div>
+        <textarea id="editor-fallback" class="editor-fallback" hidden placeholder="Markdown 正文…"></textarea>
+      </div>
+    </section>
+
+    <!-- 图床 -->
+    <section class="view" id="view-images" hidden>
+      <header class="view-head">
+        <div>
+          <h1>图床</h1>
+          <p class="view-sub">图片保存在仓库 <code>source/images/</code>，发布后即可通过站点链接访问</p>
+        </div>
+        <div class="head-actions">
+          <button class="btn primary" id="btn-upload-image" type="button">＋ 上传图片</button>
+        </div>
+      </header>
+      <div class="dropzone" id="dropzone">拖拽图片到这里，或点击上方"上传图片"（支持粘贴 Ctrl+V）</div>
+      <div class="image-grid" id="image-grid"></div>
+    </section>
+
+    <!-- 发布中心 -->
+    <section class="view" id="view-deploy" hidden>
+      <header class="view-head">
+        <div>
+          <h1>发布</h1>
+          <p class="view-sub">提交源码 → 构建静态站 → 推送到 ddmaster2608.github.io</p>
+        </div>
+      </header>
+
+      <div class="deploy-grid">
+        <div class="card">
+          <h3>一键发布</h3>
+          <p class="card-desc">提交所有更改，构建站点，推送到 GitHub Pages 仓库和源码仓库。</p>
+          <input class="input" id="commit-message" type="text" placeholder="提交信息（可留空）">
+          <div class="card-actions">
+            <button class="btn primary" id="btn-publish" type="button">🚀 发布到 GitHub Pages</button>
+            <button class="btn" id="btn-build" type="button">仅构建</button>
+          </div>
+          <p class="token-warn" id="token-warn" hidden>⚠ 未配置 GITHUB_TOKEN，推送可能失败。请在 <code>admin-ui/admin.env</code> 中填写。</p>
+        </div>
+
+        <div class="card">
+          <h3>本地预览</h3>
+          <p class="card-desc">启动 Hexo 本地服务，实时预览整站效果。</p>
+          <div class="card-actions">
+            <button class="btn" id="btn-preview-start" type="button">▶ 启动预览</button>
+            <button class="btn" id="btn-preview-stop" type="button" hidden>■ 停止预览</button>
+            <a class="btn ghost" id="btn-preview-open" href="#" target="_blank" rel="noopener" hidden>打开预览 ↗</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>仓库状态</h3>
+          <div class="repo-status" id="repo-status">加载中…</div>
+        </div>
+      </div>
+
+      <div class="console-wrap">
+        <div class="console-head">
+          <span>任务日志</span>
+          <span class="task-badge" id="task-badge" hidden></span>
+        </div>
+        <pre class="console" id="task-console">尚无任务。点击"发布"或"仅构建"开始。</pre>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- 复制链接弹窗 -->
+<div class="modal-mask" id="copy-modal" hidden>
+  <div class="modal">
+    <h3>复制图片链接</h3>
+    <div class="copy-rows" id="copy-rows"></div>
+    <div class="modal-actions">
+      <button class="btn" id="copy-modal-close" type="button">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 确认弹窗 -->
+<div class="modal-mask" id="confirm-modal" hidden>
+  <div class="modal">
+    <h3 id="confirm-title">确认操作</h3>
+    <p class="card-desc" id="confirm-text"></p>
+    <div class="modal-actions">
+      <button class="btn" id="confirm-cancel" type="button">取消</button>
+      <button class="btn danger" id="confirm-ok" type="button">确认</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept="image/*" multiple hidden>
+<div class="toasts" id="toasts"></div>
+
+<script src="/vendor/toastui-editor.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

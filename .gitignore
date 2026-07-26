@@ -4,6 +4,6 @@ db.json
 *.log
 admin-ui/admin.env
 node_modules/
-public/
+/public/
 .deploy*/
 _multiconfig.yml

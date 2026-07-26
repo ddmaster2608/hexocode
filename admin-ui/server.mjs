@@ -10,6 +10,38 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
 const publicDir = path.join(__dirname, 'public');
 const postsDir = path.join(repoRoot, 'source', '_posts');
+const imagesDir = path.join(repoRoot, 'source', 'images');
+
+function loadEnvFile(filePath) {
+  try {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    for (const line of raw.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) {
+        continue;
+      }
+      const separatorIndex = trimmed.indexOf('=');
+      if (separatorIndex === -1) {
+        continue;
+      }
+      const key = trimmed.slice(0, separatorIndex).trim();
+      let value = trimmed.slice(separatorIndex + 1).trim();
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      if (key && process.env[key] === undefined) {
+        process.env[key] = value;
+      }
+    }
+  } catch {
+    // No admin.env file - environment variables win.
+  }
+}
+
+loadEnvFile(path.join(__dirname, 'admin.env'));
 const host = process.env.ADMIN_HOST ?? '127.0.0.1';
 const port = Number.parseInt(process.env.ADMIN_PORT ?? '4210', 10);
 const previewPort = Number.parseInt(process.env.HEXO_PREVIEW_PORT ?? '4000', 10);
@@ -150,13 +182,13 @@ function requireAuth(request, response) {
   return false;
 }
 
-async function readJsonBody(request) {
+async function readJsonBody(request, maxBytes = 2_000_000) {
   const chunks = [];
   let total = 0;
 
   for await (const chunk of request) {
     total += chunk.length;
-    if (total > 2_000_000) {
+    if (total > maxBytes) {
       throw new Error('Request body is too large.');
     }
     chunks.push(chunk);
@@ -556,16 +588,22 @@ function createTask(name, runner) {
   return task;
 }
 
+// Node 18.20+ 在 Windows 上禁止 shell:false 直接启动 .cmd/.bat（CVE-2024-27980），
+// 因此对这类命令自动启用 shell。此处所有参数均为固定值，无注入风险。
+function spawnProcess(command, args, options = {}) {
+  const needsShell = process.platform === 'win32' && /\.(cmd|bat)$/i.test(command);
+  return spawn(command, args, { ...options, shell: needsShell });
+}
+
 function runCommand(task, label, command, args, options = {}) {
   return new Promise((resolve, reject) => {
     appendTaskLog(task, `\n> ${label}\n$ ${command} ${args.join(' ')}\n`);
     let settled = false;
     let timedOut = false;
 
-    const child = spawn(command, args, {
+    const child = spawnProcess(command, args, {
       cwd: options.cwd ?? repoRoot,
-      env: { ...process.env, ...options.env },
-      shell: false
+      env: { ...process.env, ...options.env }
     });
 
     const timeoutMs = options.timeoutMs ?? 10 * 60 * 1000;
@@ -655,10 +693,9 @@ async function runCommandWithRetries(task, label, command, args, options = {}) {
 
 function runCommandCapture(command, args, options = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
+    const child = spawnProcess(command, args, {
       cwd: options.cwd ?? repoRoot,
-      env: { ...process.env, ...options.env },
-      shell: false
+      env: { ...process.env, ...options.env }
     });
 
     let stdout = '';
@@ -952,7 +989,7 @@ function startPreviewProcess() {
 
   appendPreviewLog(`\n[preview] starting Hexo preview on ${previewUrl}\n`);
 
-  previewProcess = spawn(
+  previewProcess = spawnProcess(
     npmCommand,
     ['run', 'server', '--', '--port', String(previewPort), '--host', previewHost],
     {
@@ -988,6 +1025,7 @@ async function getStatusPayload() {
     previewRunning: Boolean(previewProcess),
     previewLogs: previewLogs.slice(-120).join(''),
     dependenciesInstalled: installed,
+    githubTokenConfigured: Boolean(githubToken),
     git
   };
 }
@@ -1005,6 +1043,29 @@ function getContentType(filePath) {
       return 'application/json; charset=utf-8';
     case '.svg':
       return 'image/svg+xml';
+    case '.png':
+      return 'image/png';
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.gif':
+      return 'image/gif';
+    case '.webp':
+      return 'image/webp';
+    case '.avif':
+      return 'image/avif';
+    case '.ico':
+      return 'image/x-icon';
+    case '.bmp':
+      return 'image/bmp';
+    case '.woff':
+      return 'font/woff';
+    case '.woff2':
+      return 'font/woff2';
+    case '.ttf':
+      return 'font/ttf';
+    case '.map':
+      return 'application/json; charset=utf-8';
     default:
       return 'text/plain; charset=utf-8';
   }
@@ -1031,7 +1092,145 @@ async function serveStaticFile(request, response, pathname) {
   }
 }
 
+const imageExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico', '.bmp', '.avif']);
+
+function resolveImageRelativePath(relativePath) {
+  const normalized = String(relativePath ?? '').replace(/\\/g, '/').replace(/^\/+/, '');
+  const targetPath = path.resolve(imagesDir, normalized);
+  if (targetPath !== imagesDir && !targetPath.startsWith(imagesDir + path.sep)) {
+    throw new Error('Invalid image path.');
+  }
+  return { relative: path.relative(imagesDir, targetPath).replace(/\\/g, '/'), targetPath };
+}
+
+function sanitizeImageFileName(input) {
+  const base = path.basename(String(input ?? 'image'));
+  const extension = path.extname(base).toLowerCase();
+  const stem =
+    base
+      .slice(0, base.length - extension.length)
+      .replace(/[^A-Za-z0-9一-鿿._-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80) || 'image';
+  const safeExtension = imageExtensions.has(extension) ? extension : '.png';
+  return `${stem}${safeExtension}`;
+}
+
+function buildImageSiteUrl(relative) {
+  if (!siteUrl) {
+    return '';
+  }
+  return `${siteUrl.replace(/\/+$/, '')}/images/${relative}`;
+}
+
+async function listImages() {
+  const results = [];
+
+  async function walk(currentDir) {
+    let entries;
+    try {
+      entries = await fsp.readdir(currentDir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      const entryPath = path.join(currentDir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(entryPath);
+        continue;
+      }
+      if (!imageExtensions.has(path.extname(entry.name).toLowerCase())) {
+        continue;
+      }
+      const stats = await fsp.stat(entryPath);
+      const relative = path.relative(imagesDir, entryPath).replace(/\\/g, '/');
+      results.push({
+        file: relative,
+        url: `/images/${relative}`,
+        siteUrl: buildImageSiteUrl(relative),
+        size: stats.size,
+        modifiedAt: stats.mtime.toISOString(),
+        deletable: relative.startsWith('uploads/')
+      });
+    }
+  }
+
+  await walk(imagesDir);
+  return results.sort((left, right) => Date.parse(right.modifiedAt) - Date.parse(left.modifiedAt));
+}
+
+async function serveImageFile(response, pathname) {
+  try {
+    const encoded = pathname.replace(/^\/images\//, '');
+    const { targetPath } = resolveImageRelativePath(decodeURIComponent(encoded));
+    const contents = await fsp.readFile(targetPath);
+    response.writeHead(200, {
+      'Content-Type': getContentType(targetPath),
+      'Cache-Control': 'no-store'
+    });
+    response.end(contents);
+  } catch {
+    sendText(response, 404, 'Not found');
+  }
+}
+
 async function handleApi(request, response, url) {
+  if (request.method === 'GET' && url.pathname === '/api/images') {
+    sendJson(response, 200, { images: await listImages() });
+    return;
+  }
+
+  if (request.method === 'POST' && url.pathname === '/api/images') {
+    const body = await readJsonBody(request, 30_000_000);
+    const dataBase64 = String(body.dataBase64 ?? '').replace(/^data:[^;,]+;base64,/, '');
+    if (!dataBase64) {
+      sendJson(response, 400, { error: 'Missing image data.' });
+      return;
+    }
+
+    const buffer = Buffer.from(dataBase64, 'base64');
+    if (buffer.length === 0) {
+      sendJson(response, 400, { error: 'Empty or invalid image data.' });
+      return;
+    }
+
+    const now = new Date();
+    const year = String(now.getFullYear());
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const relativeDir = `uploads/${year}/${month}`;
+    const fileName = `${Date.now()}-${sanitizeImageFileName(body.name)}`;
+    const relative = `${relativeDir}/${fileName}`;
+
+    await fsp.mkdir(path.join(imagesDir, relativeDir), { recursive: true });
+    await fsp.writeFile(path.join(imagesDir, relative), buffer);
+
+    sendJson(response, 201, {
+      file: relative,
+      url: `/images/${relative}`,
+      siteUrl: buildImageSiteUrl(relative)
+    });
+    return;
+  }
+
+  if (request.method === 'DELETE' && url.pathname === '/api/image') {
+    const file = url.searchParams.get('file');
+    if (!file) {
+      sendJson(response, 400, { error: 'Missing file parameter.' });
+      return;
+    }
+
+    const { relative, targetPath } = resolveImageRelativePath(file);
+    if (!relative.startsWith('uploads/')) {
+      sendJson(response, 403, { error: 'Only images under uploads/ can be deleted here.' });
+      return;
+    }
+
+    await fsp.unlink(targetPath);
+    sendJson(response, 200, { ok: true });
+    return;
+  }
+
   if (request.method === 'GET' && url.pathname === '/api/posts') {
     sendJson(response, 200, { posts: await listPosts() });
     return;
@@ -1236,6 +1435,11 @@ const server = http.createServer(async (request, response) => {
 
     if (url.pathname.startsWith('/api/')) {
       await handleApi(request, response, url);
+      return;
+    }
+
+    if (url.pathname.startsWith('/images/')) {
+      await serveImageFile(response, url.pathname);
       return;
     }
 

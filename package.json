@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "admin": "node admin-ui/server.mjs",
+    "build:editor": "esbuild admin-ui/vendor-entry.js --bundle --minify --outfile=admin-ui/public/vendor/toastui-editor.js",
     "build": "hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
@@ -32,6 +33,7 @@
     "turndown": "^7.2.4"
   },
   "devDependencies": {
+    "esbuild": "^0.28.1",
     "gulp": "^5.0.0"
   }
 }
