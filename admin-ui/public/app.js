@@ -52,8 +52,8 @@
   }
 
   /* ═══════════ 生成式封面 ═══════════
-     没有封面的文章，用标题哈希确定性地生成一张小封面：
-     精选色板取主色 → 邻近色渐变 → 哈希位摆放装饰圆 → 标题首字水印 */
+     没有封面的文章，用标题哈希确定性地生成一张纯色渐变封面：
+     精选色板取主色 → 邻近色渐变，角度由哈希决定 */
 
   function hashString(value) {
     let hash = 5381;
@@ -71,12 +71,6 @@
     const hue = COVER_HUES[hash % COVER_HUES.length];
     const hue2 = hue + 24 + ((hash >> 4) % 22);
     const angle = (hash >> 6) % 360;
-    const cx1 = 16 + ((hash >> 10) % 56);
-    const cy1 = 8 + ((hash >> 14) % 42);
-    const r1 = 18 + ((hash >> 18) % 14);
-    const cx2 = 40 + ((hash >> 20) % 44);
-    const cy2 = 26 + ((hash >> 24) % 34);
-    const initial = [...String(title).trim()][0] || '?';
     const gid = 'gc' + hash.toString(36);
     return `<svg class="gen-cover" viewBox="0 0 88 66" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs><linearGradient id="${gid}" gradientTransform="rotate(${angle} 0.5 0.5)">
@@ -84,10 +78,6 @@
         <stop offset="1" stop-color="hsl(${hue2} 58% 46%)"/>
       </linearGradient></defs>
       <rect width="88" height="66" fill="url(#${gid})"/>
-      <circle cx="${cx1}" cy="${cy1}" r="${r1}" fill="hsl(${hue2} 72% 82%)" opacity="0.32"/>
-      <circle cx="${cx2}" cy="${cy2}" r="14" fill="hsl(${hue} 75% 88%)" opacity="0.26"/>
-      <text x="44" y="43" text-anchor="middle" font-size="26" font-weight="600"
-        font-family="Georgia, 'STZhongsong', serif" fill="rgba(255,255,255,0.9)">${escapeHtml(initial)}</text>
     </svg>`;
   }
 
