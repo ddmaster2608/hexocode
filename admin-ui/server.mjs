@@ -912,25 +912,17 @@ async function deployPublicDirectory(task) {
   const deployDir = path.join(repoRoot, '.deploy_git');
   const pagesTargetRepository = buildAuthenticatedGithubUrl(pagesDeployRepository);
   const deployRunner = (label, command, args, options = {}) =>
-    runCommand(task, label, command, args, { cwd: deployDir, timeoutMs: 180_000, ...options });
+    runCommand(task, label, command, args, { cwd: deployDir, timeoutMs: 600_000, ...options });
   const deployRunnerWithRetries = (label, command, args, options = {}) =>
     runCommandWithRetries(task, label, command, args, {
       cwd: deployDir,
-      timeoutMs: 180_000,
+      timeoutMs: 600_000,
       ...options
     });
   const deployCapture = (command, args) => runCommandCapture(command, args, { cwd: deployDir });
 
-  await fsp.rm(deployDir, { recursive: true, force: true });
-  await fsp.mkdir(deployDir, { recursive: true });
-  await deployRunner('Initialize Pages deployment repository', 'git', ['init']);
-  await deployRunner('Switch Pages deployment branch', 'git', ['checkout', '-B', pagesDeployBranch]);
-  await deployRunner('Configure Pages deployment repository remote', 'git', [
-    'remote',
-    'add',
-    'origin',
-    pagesTargetRepository
-  ]);
+  // 复用已有部署仓库做增量推送（只传变化的文件）；仓库缺失或刷新失败时会自动回退到重建
+  await ensurePagesDeployRepository(task, deployDir, pagesTargetRepository);
   await fsp.cp(path.join(repoRoot, 'public'), deployDir, { recursive: true });
 
   await deployRunner(
@@ -1463,7 +1455,7 @@ async function handleApi(request, response, url) {
           `Push source repository to ${gitPushRemote}/${targetBranch}`,
           'git',
           ['push', sourcePushTarget, `HEAD:${targetBranch}`],
-          { retries: 3, retryDelayMs: 8000, timeoutMs: 180_000 }
+          { retries: 3, retryDelayMs: 8000, timeoutMs: 600_000 }
         );
         appendTaskLog(runningTask, '\n[info] Source repository push completed.\n');
       } catch (error) {
