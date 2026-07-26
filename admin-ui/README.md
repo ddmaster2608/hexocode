@@ -4,13 +4,17 @@
 
 ## 启动
 
-双击 `admin-ui/start-admin.cmd`，或在仓库根目录执行：
+双击桌面的 **「Goodnut 博客管理台」** 快捷方式（或 `admin-ui/start-admin.cmd`）：未运行则自动启动服务（最小化窗口），然后自动打开浏览器。
+
+也可以在仓库根目录手动执行：
 
 ```
 npm run admin
 ```
 
 然后浏览器打开 **http://127.0.0.1:4210**
+
+> 图标文件：`admin-ui/goodnut.ico`（桌面快捷方式）、`admin-ui/public/favicon.svg` / `favicon.ico`（浏览器标签页）。快捷方式若被删除，可用 `admin-ui/start-admin.cmd` 重新创建（右键 → 发送到 → 桌面快捷方式，再在属性里选择图标）。
 
 > 首次使用前需要 `npm ci` 安装依赖（管理台"发布"页里也有安装按钮）。
 
