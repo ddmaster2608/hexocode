@@ -64,6 +64,11 @@ const pagesDeployRepository =
   process.env.PAGES_DEPLOY_REPOSITORY ??
   'https://github.com/ddmaster2608/ddmaster2608.github.io.git';
 const pagesDeployBranch = process.env.PAGES_DEPLOY_BRANCH ?? 'main';
+const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+const cloudflareApiToken = (process.env.CLOUDFLARE_API_TOKEN ?? '').trim();
+const cloudflareAccountId = (process.env.CLOUDFLARE_ACCOUNT_ID ?? '').trim();
+const cloudflarePagesProject = (process.env.CLOUDFLARE_PAGES_PROJECT ?? 'goodnut-blog').trim();
+const cloudflarePagesEnabled = Boolean(cloudflareApiToken && cloudflareAccountId);
 const knownMetaKeys = new Set(['title', 'date', 'updated', 'tags', 'categories', 'abbrlink']);
 
 let previewProcess = null;
@@ -72,9 +77,12 @@ let taskSequence = 0;
 const tasks = new Map();
 
 function sanitizeLogValue(value) {
-  return String(value ?? '')
+  let text = String(value ?? '')
     .replace(/https:\/\/x-access-token:[^@]+@github\.com/gi, 'https://x-access-token:***@github.com')
     .replace(/(authorization:\s*basic\s+)[^\s]+/gi, '$1***');
+  if (githubToken) text = text.split(githubToken).join('***');
+  if (cloudflareApiToken) text = text.split(cloudflareApiToken).join('***');
+  return text;
 }
 
 function buildAuthenticatedGithubUrl(repositoryUrl) {
@@ -957,6 +965,42 @@ async function deployPublicDirectory(task) {
   );
 }
 
+/* 可选：同步部署到 Cloudflare Pages（配置 CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID 后启用） */
+async function deployCloudflarePages(task) {
+  const env = {
+    CLOUDFLARE_API_TOKEN: cloudflareApiToken,
+    CLOUDFLARE_ACCOUNT_ID: cloudflareAccountId,
+    WRANGLER_SEND_METRICS: 'false'
+  };
+  const deployArgs = [
+    'wrangler', 'pages', 'deploy', 'public',
+    '--project-name', cloudflarePagesProject,
+    '--branch', 'main',
+    '--commit-dirty=true'
+  ];
+
+  try {
+    await runCommand(task, 'Deploy site to Cloudflare Pages', npxCommand, deployArgs, {
+      timeoutMs: 900_000,
+      env
+    });
+  } catch (error) {
+    // 项目不存在时自动创建后重试一次
+    appendTaskLog(task, '\n[info] Cloudflare Pages deploy failed, trying to create the project first.\n');
+    await runCommand(
+      task,
+      'Create Cloudflare Pages project',
+      npxCommand,
+      ['wrangler', 'pages', 'project', 'create', cloudflarePagesProject, '--production-branch', 'main'],
+      { timeoutMs: 300_000, env }
+    );
+    await runCommand(task, 'Deploy site to Cloudflare Pages', npxCommand, deployArgs, {
+      timeoutMs: 900_000,
+      env
+    });
+  }
+}
+
 async function getGitStatus() {
   const available = await isGitRepository();
   if (!available) {
@@ -1440,6 +1484,21 @@ async function handleApi(request, response, url) {
         appendTaskLog(runningTask, '\n[info] GitHub Pages repository update completed.\n');
       } else {
         appendTaskLog(runningTask, '\n[info] GitHub Pages deployment is disabled.\n');
+      }
+
+      if (cloudflarePagesEnabled) {
+        try {
+          await deployCloudflarePages(runningTask);
+          appendTaskLog(
+            runningTask,
+            `\n[info] Cloudflare Pages 部署完成：https://${cloudflarePagesProject}.pages.dev\n`
+          );
+        } catch (error) {
+          appendTaskLog(
+            runningTask,
+            `\n[warn] Cloudflare Pages 部署失败（不影响 GitHub Pages）：${error.message}\n`
+          );
+        }
       }
 
       const targetBranch = gitPushBranch || gitStatus.branch;

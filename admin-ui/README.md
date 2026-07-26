@@ -36,6 +36,10 @@ npm run admin
 2. 勾选 **repo** 权限，生成后复制
 3. 填入 `admin.env` 的 `GITHUB_TOKEN=` 后面，重启管理台
 
+## 可选：Cloudflare Pages 镜像（国内访问备用入口）
+
+在 `admin.env` 中填写 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID`（见 `admin.env.example` 里的注释步骤）并重启管理台后，每次「发布」会在推送 GitHub Pages 之后自动把站点同步部署到 Cloudflare Pages，地址为 `https://goodnut-blog.pages.dev`（项目名可用 `CLOUDFLARE_PAGES_PROJECT` 修改）。首次发布会自动创建项目。Cloudflare 部署失败不会影响 GitHub Pages 主发布。
+
 其它可选配置（`admin.env`）：
 
 - `ADMIN_USERNAME` / `ADMIN_PASSWORD`：填写后访问管理台需要登录（默认只监听 127.0.0.1，仅本机可访问）
