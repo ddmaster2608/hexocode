@@ -5,7 +5,7 @@ date: '2025-03-31T21:52:06.451323+08:00'
 tags: []
 title: sqlmap使用
 updated: '2025-03-31T21:56:46.751+08:00'
-cover: 'https://files.seeusercontent.com/2026/05/10/Co6n/IMG_20241130_115953.jpg'
+cover: /images/covers/294132f6c4.jpg
 ---
 # 1. **目标指定**
 

@@ -8,7 +8,7 @@ tags:
 - ctf
 title: web之信息搜集
 updated: '2025-05-24T19:34:43.187+08:00'
-cover: 'https://files.seeusercontent.com/2026/05/10/6Gpy/d8bd4b294d337b7d2a1085e8b0e1c710.jpg'
+cover: /images/covers/2646fa66e7.jpg
 ---
 # 按f12
 

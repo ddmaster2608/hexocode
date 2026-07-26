@@ -8,7 +8,7 @@ tags:
 - ctf
 title: web（1）
 updated: '2025-03-28T23:55:22.414+08:00'
-cover: 'https://files.seeusercontent.com/2026/05/10/5bdM/IMG_20240915_132235.jpg'
+cover: /images/covers/1a65135e75.jpg
 ---
 # 概述
 

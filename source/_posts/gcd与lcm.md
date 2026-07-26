@@ -5,7 +5,7 @@ date: '2025-04-10T17:46:54.838435+08:00'
 tags: []
 title: gcd与lcm
 updated: '2025-11-18T16:15:03.965+08:00'
-cover: 'https://files.seeusercontent.com/2026/05/10/x5wO/IMG_20260406_091136.jpg'
+cover: /images/covers/9a6cd175d1.jpg
 ---
 # gcd与lcm计算代码
 

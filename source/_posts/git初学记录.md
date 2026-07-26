@@ -7,7 +7,7 @@ tags:
 - git
 title: git初学记录
 updated: '2024-10-27T11:31:01.843+08:00'
-cover: 'https://files.seeusercontent.com/2026/05/10/yJ1a/IMG_20250302_182051.jpg'
+cover: /images/covers/b2060ef23b.jpg
 ---
 # git 将本地仓库上传至github
 
