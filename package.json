@@ -28,7 +28,7 @@
     "hexo-theme-landscape": "^1.0.0",
     "hexo-theme-redefine": "^2.9.0",
     "marked": "^18.0.3",
-    "pangu": "^4.0.7",
+    "pangu": "^8.2.0",
     "quill": "^2.0.3",
     "turndown": "^7.2.4"
   },
