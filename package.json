@@ -33,7 +33,7 @@
     "turndown": "^7.2.4"
   },
   "devDependencies": {
-    "esbuild": "^0.28.1",
+    "esbuild": "^0.28.2",
     "gulp": "^5.0.0",
     "wrangler": "^4.114.0"
   }
