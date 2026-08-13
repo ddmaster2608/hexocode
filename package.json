@@ -35,6 +35,6 @@
   "devDependencies": {
     "esbuild": "^0.28.1",
     "gulp": "^5.0.0",
-    "wrangler": "^4.114.0"
+    "wrangler": "^4.120.1"
   }
 }
