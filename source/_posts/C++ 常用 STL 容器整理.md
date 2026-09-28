@@ -3,6 +3,9 @@ title: 'C++ 常用 STL 容器整理'
 date: '2026-05-20T19:47:54+08:00'
 updated: '2026-05-20T20:16:18+08:00'
 abbrlink: ''
+cover: /images/cover-pool/auto-331608b0-953e-4136-b915-3e617c0b0fd1.jpg
+cover_source: 'https://commons.wikimedia.org/wiki/File%3ASouth_Plateau_Landscape_Area_Treatment_Project_Custer_Gallatin_National_Forest_SPLAT_(54083123311).jpg'
+cover_license: 'Public domain'
 ---
 # C++ 常用 STL 容器与函数整理
 

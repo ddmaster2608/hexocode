@@ -10,18 +10,49 @@ defaults:
 colors:
   primary: '#A31F34'
   default_mode: light
+  secondary: null
 global:
   website_counter:
     enable: false
     site_pv: false
     site_uv: false
     post_pv: false
+    url: https://cn.vercount.one/js
   preloader:
     enable: false
+    custom_message: null
   open_graph:
     enable: true
     image: /images/avatar.jpg
     description: Goodnut 的博客，记录折腾、学习与随想。
+  fonts:
+    chinese:
+      enable: false
+      family: null
+      url: null
+    english:
+      enable: false
+      family: null
+      url: null
+    title:
+      enable: false
+      family: null
+      url: null
+  content_max_width: 1000px
+  sidebar_width: 210px
+  hover:
+    shadow: true
+    scale: false
+  scroll_progress:
+    bar: false
+    percentage: true
+  single_page: true
+  side_tools:
+    gear_rotation: true
+    auto_expand: false
+  google_analytics:
+    enable: false
+    id: null
 home_banner:
   enable: true
   style: fixed
@@ -31,23 +62,43 @@ home_banner:
   title: 当时只道是寻常
   subtitle:
     text:
-    - Goodnut's Blog
+      - Goodnut's Blog
     typing_speed: 100
     backing_speed: 80
     starting_delay: 500
     backing_delay: 1500
     loop: true
     smart_backspace: true
+    hitokoto:
+      enable: false
+      show_author: false
+      api: https://v1.hitokoto.cn
   social_links:
     enable: true
     style: default
     links:
-    - icon: github
-      url: https://github.com/ddmaster2608
-    - icon: email
-      url: mailto:owen238509427@163.com
-    - icon: fa-brands fa-bilibili
-      url: https://space.bilibili.com/511179155?spm_id_from=333.337.0.0
+      - icon: github
+        url: https://github.com/ddmaster2608
+      - icon: email
+        url: mailto:owen238509427@163.com
+      - icon: fa-brands fa-bilibili
+        url: https://space.bilibili.com/511179155?spm_id_from=333.337.0.0
+    qrs:
+      - icon: weixin
+        qr: null
+      - icon: /images/custom-icon.svg
+        qr: null
+  text_color:
+    light: "#fff"
+    dark: "#d1d1b6"
+  text_style:
+    title_size: 2.8rem
+    subtitle_size: 1.5rem
+    line_height: 1.2
+  custom_font:
+    enable: false
+    family: null
+    url: null
 navbar:
   links:
     Home:
@@ -64,6 +115,15 @@ navbar:
       icon: fa-regular fa-tags
   search:
     enable: false
+    preload: true
+  auto_hide: false
+  color:
+    left: "#f78736"
+    right: "#367df7"
+    transparency: 35
+  width:
+    home: 1200px
+    pages: 1000px
 home:
   sidebar:
     enable: true
@@ -81,6 +141,14 @@ home:
       Tags:
         path: /tags
         icon: fa-regular fa-tags
+  article_date_format: auto
+  excerpt_length: 200
+  categories:
+    enable: true
+    limit: 3
+  tags:
+    enable: true
+    limit: 3
 articles:
   word_count:
     enable: true
@@ -89,6 +157,51 @@ articles:
   copyright:
     enable: true
     default: cc_by_nc_sa
+  style:
+    font_size: 16px
+    line_height: 1.5
+    image_border_radius: 14px
+    image_alignment: center
+    image_caption: false
+    link_icon: true
+    delete_mask: false
+    title_alignment: left
+    headings_top_spacing:
+      h1: 3.2rem
+      h2: 2.4rem
+      h3: 1.9rem
+      h4: 1.6rem
+      h5: 1.4rem
+      h6: 1.3rem
+  author_label:
+    enable: true
+    auto: false
+    list: []
+  code_block:
+    copy: true
+    style: mac
+    highlight_theme:
+      light: github
+      dark: vs2015
+    font:
+      enable: false
+      family: null
+      url: null
+  toc:
+    enable: true
+    max_depth: 3
+    number: false
+    expand: true
+    init_open: true
+  lazyload: true
+  pangu_js: false
+  recommendation:
+    enable: false
+    title: 推荐阅读
+    limit: 3
+    mobile_limit: 2
+    placeholder: /images/wallhaven-wqery6-light.webp
+    skip_dirs: []
 comment:
   enable: true
   system: giscus
@@ -105,12 +218,44 @@ comment:
       lang: zh-CN
       input_position: bottom
       loading: lazy
+    waline:
+      serverUrl: https://example.example.com
+      lang: zh-CN
+      emoji: []
+      recaptchaV3Key: null
+      turnstileKey: null
+      reaction: false
+    gitalk:
+      clientID: null
+      clientSecret: null
+      repo: null
+      owner: null
+      proxy: null
+    twikoo:
+      version: 1.6.10
+      server_url: null
+      region: null
+    artalk:
+      server: null
+      site: null
+    utterances:
+      repo: null
+      issue_term: pathname
+      issue_number: null
+      label: null
+      theme_light: github-light
+      theme_dark: github-dark
 footer:
   runtime: false
   statistics: false
   customize: Goodnut's BLOG
   icp:
     enable: false
+    number: null
+    url: null
+  icon: '<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration:
+    0.5s; color: #f54545"></i>'
+  start: 2022/8/17 11:45:14
 plugins:
   feed:
     enable: false
@@ -118,18 +263,58 @@ plugins:
     enable: true
     type: fixed
     audios:
-    - name: 无论你多怪异我还是会喜欢你
-      artist: 江惠莲
-      url: /music/wulun.m4a
-      cover: /music/wulun-cover.jpg
-      lrc: ''
-      theme: '#A31F34'
+      - name: 无论你多怪异我还是会喜欢你
+        artist: 江惠莲
+        url: /music/wulun.m4a
+        cover: /music/wulun-cover.jpg
+        lrc: ''
+        theme: '#A31F34'
   mermaid:
     enable: false
+    version: 11.4.1
+    theme:
+      light: default
+      dark: dark
 inject:
   enable: true
   head:
-  - "<style>.home-banner .description,\n.home-banner .description * ,\n.home-sidebar,\n\
-    .home-sidebar * ,\n.info-card,\n.info-card * {\n  font-family: 'PingFang SC',\
-    \ 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans\
-    \ SC', 'WenQuanYi Micro Hei', sans-serif !important;\n}</style>"
+    - "<style>.home-banner .description,
+
+      .home-banner .description * ,
+
+      .home-sidebar,
+
+      .home-sidebar * ,
+
+      .info-card,
+
+      .info-card * {
+
+      \  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+      'Noto Sans CJK SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei',
+      sans-serif !important;
+
+      }</style>"
+  footer:
+    - null
+    - null
+fontawesome:
+  thin: false
+  light: false
+  duotone: false
+  sharp_solid: false
+page_templates:
+  friends_column: 2
+  tags_style: blur
+  masonry:
+    batch_size: 12
+    initial_batch_size: 24
+cdn:
+  enable: false
+  provider: npmmirror
+  custom_url: null
+developer:
+  enable: false
+style:
+  first_screen:
+    description: Goodnut 的博客，记录折腾、学习与随想。
